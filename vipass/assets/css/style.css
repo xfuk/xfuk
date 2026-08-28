@@ -130,6 +130,16 @@ h1, h2, h3, legend, .statusbar {
 }
 
 h1 { font-size: 1.75em; line-height: 1.45; text-wrap: balance; margin: 1.2em 0 .6em; }
+/* 製品名を主、試験名を従に置く */
+#start-heading { letter-spacing: .04em; }
+.title-sub {
+  display: block;
+  font-size: .52em;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--muted);
+  margin-top: .2em;
+}
 h2 {
   font-size: 1.3em;
   margin: 2.4em 0 .8em;

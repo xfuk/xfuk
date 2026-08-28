@@ -2,7 +2,7 @@
 /*
  * build-single.js - index.html と assets/ を1枚の HTML にまとめる。
  *
- *   node tools/build-single.js              → dist/ipexam-standalone.html
+ *   node tools/build-single.js              → dist/vipass-standalone.html
  *       配布用。単体で開ける完全な HTML。USB メモリや LMS への設置向け。
  *
  *   node tools/build-single.js --artifact [出力先]
@@ -51,8 +51,8 @@ if (artifactMode) {
 }
 
 const dest = outArg || (artifactMode
-  ? 'dist/ipexam-artifact.html'
-  : 'dist/ipexam-standalone.html');
+  ? 'dist/vipass-artifact.html'
+  : 'dist/vipass-standalone.html');
 const destPath = path.isAbsolute(dest) ? dest : path.join(root, dest);
 fs.mkdirSync(path.dirname(destPath), { recursive: true });
 fs.writeFileSync(destPath, out, 'utf8');

@@ -7,7 +7,7 @@
 (function (global) {
   'use strict';
 
-  global.IPExamSampleData = {
+  global.VipassSampleData = {
     title: '情報処理技術者試験 模擬検定（サンプル10問）',
     timeLimitSec: 30 * 60,
     questions: [

@@ -1,6 +1,7 @@
-# 情報処理技術者試験 模擬検定システム（スクリーンリーダ対応）
+# VIPASS 情報処理技術者試験 模擬検定システム
 
 キーボードだけで四肢択一問題に解答できる、ブラウザ完結の模擬検定Webアプリです。
+スクリーンリーダに対応しています。
 
 視覚障害者向け「日商PC検定3級」模擬検定システム（日本視覚障害者職能開発センター）が
 20年以上使ってきたキー操作を参考に、情報処理技術者試験の形式へ割り当て直しました。
@@ -9,20 +10,20 @@
 
 ## 使い方
 
-`ipexam/index.html` をブラウザで開くだけです。ビルドもサーバも不要で、
+`vipass/index.html` をブラウザで開くだけです。ビルドもサーバも不要で、
 ファイルを直接開いても（`file://`）動きます。
 
 ```
 # ローカルサーバで開く場合（任意）
-npx http-server ipexam -p 8080
+npx http-server vipass -p 8080
 ```
 
-`ipexam/dist/ipexam-standalone.html` は、CSS と JavaScript を1枚にまとめた配布用ファイルです。
+`vipass/dist/vipass-standalone.html` は、CSS と JavaScript を1枚にまとめた配布用ファイルです。
 このファイル1つをコピーするだけで動くので、USB メモリや LMS への設置に使えます。
 更新するときは次のコマンドで作り直します。
 
 ```
-node ipexam/tools/build-single.js
+node vipass/tools/build-single.js
 ```
 
 対応ブラウザは **Chrome / Edge**（Firefox は前提にしていません）。
@@ -169,7 +170,7 @@ macOS で <kbd>Option</kbd>+英字を押すと合成文字（例: <kbd>Option</k
 ## ファイル構成
 
 ```
-ipexam/
+vipass/
 ├── index.html                起動画面・解答画面・結果画面
 ├── assets/
 │   ├── css/style.css         表示（ハイコントラスト、文字サイズ）

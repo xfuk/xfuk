@@ -110,5 +110,5 @@
     }
   };
 
-  global.IPExamSpeaker = Speaker;
+  global.VipassSpeaker = Speaker;
 })(window);

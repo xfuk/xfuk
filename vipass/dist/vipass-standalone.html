@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>情報処理技術者試験 模擬検定システム</title>
-<meta name="description" content="視覚障害者向け「日商PC検定3級」模擬検定システムのキー操作を参考にした、情報処理技術者試験の模擬検定Webアプリ。">
+<title>VIPASS 模擬検定システム</title>
+<meta name="description" content="VIPASS — 視覚障害者向け「日商PC検定3級」模擬検定システムのキー操作を参考にした、情報処理技術者試験の模擬検定Webアプリ。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
@@ -141,6 +141,16 @@ h1, h2, h3, legend, .statusbar {
 }
 
 h1 { font-size: 1.75em; line-height: 1.45; text-wrap: balance; margin: 1.2em 0 .6em; }
+/* 製品名を主、試験名を従に置く */
+#start-heading { letter-spacing: .04em; }
+.title-sub {
+  display: block;
+  font-size: .52em;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--muted);
+  margin-top: .2em;
+}
 h2 {
   font-size: 1.3em;
   margin: 2.4em 0 .8em;
@@ -407,10 +417,10 @@ footer {
 
 <!-- ======================= 起動と準備 ======================= -->
 <section id="screen-start" aria-labelledby="start-heading">
-  <h1 id="start-heading" tabindex="-1">情報処理技術者試験 模擬検定システム</h1>
+  <h1 id="start-heading" tabindex="-1">VIPASS<span class="title-sub">情報処理技術者試験 模擬検定システム</span></h1>
 
   <p class="lead">
-    このシステムは、キーボードだけで四肢択一の問題に解答できる模擬検定です。
+    VIPASS は、キーボードだけで四肢択一の問題に解答できる模擬検定システムです。
     視覚障害者向け「日商PC検定3級」模擬検定システムのキー操作を参考に、
     情報処理技術者試験の形式へ割り当て直しています。
     操作はすべて <kbd>Alt</kbd> との同時押しです。
@@ -808,7 +818,7 @@ footer {
     });
   }
 
-  global.IPExamKeymap = {
+  global.VipassKeymap = {
     layoutRows: layoutRows,
     roleLabels: ROLE_LABELS,
     entries: ENTRIES,
@@ -935,7 +945,7 @@ footer {
     }
   };
 
-  global.IPExamSpeaker = Speaker;
+  global.VipassSpeaker = Speaker;
 })(window);
 
 </script>
@@ -949,7 +959,7 @@ footer {
 (function (global) {
   'use strict';
 
-  global.IPExamSampleData = {
+  global.VipassSampleData = {
     title: '情報処理技術者試験 模擬検定（サンプル10問）',
     timeLimitSec: 30 * 60,
     questions: [
@@ -1095,12 +1105,12 @@ footer {
 (function (global) {
   'use strict';
 
-  var Keymap = global.IPExamKeymap;
-  var Speaker = global.IPExamSpeaker;
+  var Keymap = global.VipassKeymap;
+  var Speaker = global.VipassSpeaker;
 
   var CHOICE_LABELS = ['ア', 'イ', 'ウ', 'エ'];
-  var SETTINGS_KEY = 'ipexam.settings.v1';
-  var SESSION_KEY = 'ipexam.session.v1';
+  var SETTINGS_KEY = 'vipass.settings.v1';
+  var SESSION_KEY = 'vipass.session.v1';
   var QUIT_CONFIRM_MS = 15000;
   var STICKY_MS = 5000;
 
@@ -1178,7 +1188,7 @@ footer {
       this.renderKeyMap(document.getElementById('key-map'));
       this.bindButtons();
       this.bindKeys();
-      this.exam = this.normalizeExam(global.IPExamSampleData);
+      this.exam = this.normalizeExam(global.VipassSampleData);
       this.showResumeOption();
       this.show('start');
     },
@@ -1992,7 +2002,7 @@ footer {
     }
   };
 
-  global.IPExamApp = App;
+  global.VipassApp = App;
   document.addEventListener('DOMContentLoaded', function () { App.init(); });
 })(window);
 

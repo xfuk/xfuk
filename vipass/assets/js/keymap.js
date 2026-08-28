@@ -209,7 +209,7 @@
     });
   }
 
-  global.IPExamKeymap = {
+  global.VipassKeymap = {
     layoutRows: layoutRows,
     roleLabels: ROLE_LABELS,
     entries: ENTRIES,

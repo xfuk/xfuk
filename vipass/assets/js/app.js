@@ -8,12 +8,12 @@
 (function (global) {
   'use strict';
 
-  var Keymap = global.IPExamKeymap;
-  var Speaker = global.IPExamSpeaker;
+  var Keymap = global.VipassKeymap;
+  var Speaker = global.VipassSpeaker;
 
   var CHOICE_LABELS = ['ア', 'イ', 'ウ', 'エ'];
-  var SETTINGS_KEY = 'ipexam.settings.v1';
-  var SESSION_KEY = 'ipexam.session.v1';
+  var SETTINGS_KEY = 'vipass.settings.v1';
+  var SESSION_KEY = 'vipass.session.v1';
   var QUIT_CONFIRM_MS = 15000;
   var STICKY_MS = 5000;
 
@@ -91,7 +91,7 @@
       this.renderKeyMap(document.getElementById('key-map'));
       this.bindButtons();
       this.bindKeys();
-      this.exam = this.normalizeExam(global.IPExamSampleData);
+      this.exam = this.normalizeExam(global.VipassSampleData);
       this.showResumeOption();
       this.show('start');
     },
@@ -905,6 +905,6 @@
     }
   };
 
-  global.IPExamApp = App;
+  global.VipassApp = App;
   document.addEventListener('DOMContentLoaded', function () { App.init(); });
 })(window);
