@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>情報処理技術者試験 模擬検定システム</title>
+<meta name="description" content="視覚障害者向け「日商PC検定3級」模擬検定システムのキー操作を参考にした、情報処理技術者試験の模擬検定Webアプリ。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<style>
+/* 情報処理技術者試験 模擬検定システム
+   ------------------------------------------------------------------
+   本文は BIZ UDPGothic（ユニバーサルデザイン書体）、見出しは Zen Kaku Gothic New。
+   読み上げ主体の利用が前提なので、視覚的な装飾には情報を持たせない。
+   配色は3系統:
+     - 標準（明るい）           :root
+     - 標準（暗い）             OS 設定 / ホストのテーマに追随
+     - ハイコントラスト          html[data-contrast="high"]（利用者が選択、常に優先）
+   ------------------------------------------------------------------ */
+
+:root {
+  --font-scale: 1;
+
+  /* 明るい配色。ニュートラルはわずかに藍を含ませて、藍色のアクセントと同居させる */
+  --bg:       #fbfcfd;
+  --panel:    #eef2f7;
+  --fg:       #16202c;
+  --muted:    #4d5a68;
+  --line:     #bcc6d2;
+  --line-soft:#dbe2ea;
+  --accent:   #17457e;   /* 藍 */
+  --accent-fg:#ffffff;
+  --accent-soft: #dce7f5;
+  --ok:       #16653f;
+  --ng:       #9a1b22;
+  --focus:    #17457e;
+
+  /* キー配列図の色分け */
+  --k-question: #cfe0f4;
+  --k-choice:   #d6ecdc;
+  --k-answer:   #f7e2c8;
+  --k-move:     #e2dcf3;
+  --k-info:     #f8dbdd;
+  --k-reserved: #e4e7eb;
+  --k-ink:      #16202c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-contrast="high"]) {
+    --bg:       #101720;
+    --panel:    #1a2431;
+    --fg:       #e7edf4;
+    --muted:    #a7b4c2;
+    --line:     #435365;
+    --line-soft:#2a3644;
+    --accent:   #8fb9e8;
+    --accent-fg:#0d141c;
+    --accent-soft: #1e2f43;
+    --ok:       #6cd39a;
+    --ng:       #ef9298;
+    --focus:    #8fb9e8;
+
+    --k-question: #1f3a55;
+    --k-choice:   #1e4033;
+    --k-answer:   #4a3720;
+    --k-move:     #322a52;
+    --k-info:     #4b2730;
+    --k-reserved: #262f3a;
+    --k-ink:      #e7edf4;
+  }
+}
+
+:root[data-theme="dark"]:not([data-contrast="high"]) {
+  --bg:       #101720;
+  --panel:    #1a2431;
+  --fg:       #e7edf4;
+  --muted:    #a7b4c2;
+  --line:     #435365;
+  --line-soft:#2a3644;
+  --accent:   #8fb9e8;
+  --accent-fg:#0d141c;
+  --accent-soft: #1e2f43;
+  --ok:       #6cd39a;
+  --ng:       #ef9298;
+  --focus:    #8fb9e8;
+
+  --k-question: #1f3a55;
+  --k-choice:   #1e4033;
+  --k-answer:   #4a3720;
+  --k-move:     #322a52;
+  --k-info:     #4b2730;
+  --k-reserved: #262f3a;
+  --k-ink:      #e7edf4;
+}
+
+/* 利用者が明示的に選んだハイコントラストは、OS のテーマより優先する */
+html[data-contrast="high"] {
+  --bg:       #000000;
+  --panel:    #000000;
+  --fg:       #ffe800;
+  --muted:    #ffe800;
+  --line:     #ffe800;
+  --line-soft:#ffe800;
+  --accent:   #ffe800;
+  --accent-fg:#000000;
+  --accent-soft: #000000;
+  --ok:       #62ff9c;
+  --ng:       #ff9aa0;
+  --focus:    #ffffff;
+
+  --k-question: #000000;
+  --k-choice:   #000000;
+  --k-answer:   #000000;
+  --k-move:     #000000;
+  --k-info:     #000000;
+  --k-reserved: #000000;
+  --k-ink:      #ffe800;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+body {
+  margin: 0;
+  padding: 0 1.25rem 5rem;
+  background: var(--bg);
+  color: var(--fg);
+  /* BIZ UDPGothic はユニバーサルデザイン書体。読みやすさを最優先する本文に使う */
+  font-family: "BIZ UDPGothic", "Meiryo", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+  font-size: calc(1.0625rem * var(--font-scale));
+  line-height: 1.9;
+  font-feature-settings: "palt" 0;
+}
+
+main { max-width: 62rem; margin: 0 auto; }
+
+h1, h2, h3, legend, .statusbar {
+  font-family: "Zen Kaku Gothic New", "BIZ UDPGothic", "Meiryo", system-ui, sans-serif;
+}
+
+h1 { font-size: 1.75em; line-height: 1.45; text-wrap: balance; margin: 1.2em 0 .6em; }
+h2 {
+  font-size: 1.3em;
+  margin: 2.4em 0 .8em;
+  padding-bottom: .25em;
+  border-bottom: 2px solid var(--line);
+  text-wrap: balance;
+}
+h3 { font-size: 1.05em; margin: 1.4em 0 .4em; }
+
+p { margin: .7em 0; }
+
+a { color: var(--accent); }
+
+.lead { max-width: 44em; }
+
+.skip-link {
+  position: absolute;
+  left: -9999px; top: 0;
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: .6em 1.2em;
+  z-index: 10;
+}
+.skip-link:focus { left: 0; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* フォーカスは常にはっきり見えるように */
+:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: 3px solid var(--focus); }
+/* 解答画面のコンテナは自動でフォーカスするので、控えめな表示にする */
+#exam-app:focus { outline: 2px dashed var(--line); outline-offset: 8px; }
+
+fieldset {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1em 1.3em 1.2em;
+  margin: 1em 0 1.6em;
+  background: var(--panel);
+}
+legend { font-weight: 700; padding: 0 .5em; }
+
+ul.options { list-style: none; margin: .6em 0; padding: 0; display: flex; flex-direction: column; gap: .45em; }
+ul.options li { display: flex; align-items: flex-start; gap: .6em; }
+ul.options input { margin-top: .5em; flex: none; transform: scale(1.3); }
+
+input[type="radio"], input[type="checkbox"] { accent-color: var(--accent); }
+
+label { cursor: pointer; }
+
+.field { display: flex; flex-wrap: wrap; align-items: center; gap: .7em; margin: .9em 0; }
+
+input[type="number"], input[type="file"] {
+  font: inherit;
+  font-size: 1em;
+  padding: .35em .5em;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--fg);
+}
+input[type="number"] { width: 6em; font-variant-numeric: tabular-nums; }
+
+.hint { color: var(--muted); font-size: .94em; max-width: 46em; }
+
+.actions { display: flex; flex-wrap: wrap; gap: .8em; margin: 1.4em 0; }
+
+button {
+  font-family: "Zen Kaku Gothic New", "BIZ UDPGothic", system-ui, sans-serif;
+  font-size: 1em;
+  padding: .6em 1.3em;
+  border: 2px solid var(--accent);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+  min-height: 2.9em;
+}
+button.primary { background: var(--accent); color: var(--accent-fg); }
+button:hover { text-decoration: underline; }
+
+kbd {
+  font-family: ui-monospace, "Consolas", "SFMono-Regular", monospace;
+  font-size: .9em;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: .05em .4em;
+  background: var(--bg);
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+/* ---- キー配列図 -------------------------------------------------------
+   割当ての理屈（問題文＝上段、選択肢＝中段、解答＝下段、移動＝左手）は
+   物理キーの位置そのものなので、キーボードの並びで示す。
+   同じ情報は下の表にもあるため、この図は支援技術からは隠す。 */
+.kbd-map { margin: 1.2em 0; overflow-x: auto; }
+.kbd-row { display: flex; gap: .3rem; margin-bottom: .3rem; }
+.kbd-row .indent { flex: none; }
+.kbd-row .indent.i1 { width: 1.1rem; }
+.kbd-row .indent.i2 { width: 2.4rem; }
+
+.kbd-key {
+  flex: none;
+  width: 4.4rem;
+  min-height: 3.4rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: .25rem .3rem;
+  background: var(--panel);
+  color: var(--k-ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .1rem;
+  line-height: 1.25;
+}
+.kbd-key .cap {
+  font-family: ui-monospace, "Consolas", monospace;
+  font-weight: 700;
+  font-size: 1em;
+}
+.kbd-key .use { font-size: .62em; text-align: center; color: var(--k-ink); }
+.kbd-key[data-role="question"] { background: var(--k-question); }
+.kbd-key[data-role="choice"]   { background: var(--k-choice); }
+.kbd-key[data-role="answer"]   { background: var(--k-answer); }
+.kbd-key[data-role="move"]     { background: var(--k-move); }
+.kbd-key[data-role="info"]     { background: var(--k-info); }
+.kbd-key[data-role="reserved"] { background: var(--k-reserved); border-style: dashed; opacity: .85; }
+.kbd-key[data-role="unused"]   { background: transparent; opacity: .45; }
+
+.kbd-legend {
+  list-style: none;
+  display: flex; flex-wrap: wrap; gap: .4em 1.2em;
+  margin: .8em 0 0; padding: 0;
+  font-size: .92em;
+}
+.kbd-legend li { display: flex; align-items: center; gap: .45em; }
+.kbd-legend .swatch {
+  width: 1.1em; height: 1.1em; flex: none;
+  border: 1px solid var(--line); border-radius: 3px;
+}
+
+/* ---- 試験画面 ---- */
+.exam-header { border-bottom: 2px solid var(--line); }
+
+.statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3em 1.5em;
+  margin: .3em 0 .9em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.statusbar span { white-space: nowrap; }
+#sticky-indicator.armed {
+  background: var(--accent); color: var(--accent-fg);
+  padding: 0 .6em; border-radius: 4px;
+}
+
+.question { max-width: 46em; }
+.question-text .sentence { margin: .45em 0; display: flex; gap: .6em; }
+.sentence-no { color: var(--muted); flex: none; font-variant-numeric: tabular-nums; }
+
+.figures figure {
+  margin: 1.2em 0;
+  padding: .9em 1.1em;
+  border-left: 5px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--accent-soft);
+}
+.figures figcaption { font-weight: 700; margin-bottom: .2em; }
+.figures p { margin: 0; }
+
+.choices { max-width: 46em; }
+.choices ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .55em; }
+.choices li { display: flex; align-items: flex-start; gap: .7em; }
+.choices input { margin-top: .5em; flex: none; transform: scale(1.4); }
+
+.key-tables { display: grid; gap: 1.2em; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
+.key-group table { border-collapse: collapse; width: 100%; font-size: .95em; }
+.key-group th, .key-group td {
+  border: 1px solid var(--line-soft);
+  padding: .3em .6em;
+  text-align: left;
+  vertical-align: top;
+}
+.key-group thead th { background: var(--panel); }
+.key-group th[scope="row"] { white-space: nowrap; }
+
+details { margin: 1.4em 0; }
+summary { cursor: pointer; font-weight: 700; padding: .3em 0; }
+
+.log-section { margin-top: 2.4em; }
+.speech-log {
+  list-style: none;
+  margin: 0; padding: .5em .8em;
+  max-height: 12em;
+  overflow-y: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: var(--panel);
+  font-size: .92em;
+  line-height: 1.7;
+}
+.speech-log li { padding: .2em 0; border-bottom: 1px solid var(--line-soft); }
+.speech-log li:last-child { border-bottom: 0; }
+
+/* ---- 結果画面 ---- */
+.summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: .3em 2em;
+  max-width: 26em;
+  font-variant-numeric: tabular-nums;
+}
+.summary dt { font-weight: 700; }
+.summary dd { margin: 0; }
+
+.result-list { padding-left: 1.5em; max-width: 48em; }
+.result-list li { margin: 1.4em 0; padding-left: .7em; border-left: 5px solid var(--line); }
+.result-list li.correct { border-left-color: var(--ok); }
+.result-list li.incorrect { border-left-color: var(--ng); }
+.result-list h3 { margin: 0 0 .3em; }
+.result-list .explanation { color: var(--muted); }
+
+footer {
+  max-width: 62rem;
+  margin: 4em auto 0;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 1.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+  .actions, .log-section, .kbd-map { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">本文へ移動</a>
+
+<!-- 読み上げ用のライブリージョン（画面には表示しない） -->
+<div id="live-a" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="live-b" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="live-assertive" class="visually-hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<main id="main">
+
+<!-- ======================= 起動と準備 ======================= -->
+<section id="screen-start" aria-labelledby="start-heading">
+  <h1 id="start-heading" tabindex="-1">情報処理技術者試験 模擬検定システム</h1>
+
+  <p class="lead">
+    このシステムは、キーボードだけで四肢択一の問題に解答できる模擬検定です。
+    視覚障害者向け「日商PC検定3級」模擬検定システムのキー操作を参考に、
+    情報処理技術者試験の形式へ割り当て直しています。
+    操作はすべて <kbd>Alt</kbd> との同時押しです。
+    スクリーンリーダを使わない方にも、目と手を動かさずに解答できる方法として利用できます。
+  </p>
+
+  <h2>1. 読み上げの方法を選ぶ</h2>
+  <fieldset>
+    <legend>読み上げ方法</legend>
+    <p class="hint">
+      スクリーンリーダ（NVDA、PC-Talker、JAWS、ナレーター、VoiceOver など）をお使いの方は
+      「スクリーンリーダで読む」のままにしてください。二重に読み上げられるのを防ぎます。
+    </p>
+    <ul class="options">
+      <li><input type="radio" id="sm-sr" name="speech-mode" value="sr">
+          <label for="sm-sr">スクリーンリーダで読む（既定）</label></li>
+      <li><input type="radio" id="sm-tts" name="speech-mode" value="tts">
+          <label for="sm-tts">このブラウザの音声合成で読む</label></li>
+      <li><input type="radio" id="sm-both" name="speech-mode" value="both">
+          <label for="sm-both">両方で読む</label></li>
+    </ul>
+    <p id="tts-note" class="hint"></p>
+    <p class="field">
+      <label for="opt-rate">音声合成の速さ（0.5〜3.0）</label>
+      <input type="number" id="opt-rate" min="0.5" max="3" step="0.1" inputmode="decimal">
+    </p>
+  </fieldset>
+
+  <h2>2. キー操作の設定</h2>
+  <fieldset>
+    <legend>キー操作</legend>
+    <ul class="options">
+      <li><input type="checkbox" id="opt-sticky">
+          <label for="opt-sticky">固定キー方式を使う（<kbd>Alt</kbd> を押して離してから、次のキーを単独で押す）</label></li>
+      <li><input type="checkbox" id="opt-appmode">
+          <label for="opt-appmode">アプリケーションモード（試験中はスクリーンリーダのキー操作より本システムを優先する。推奨）</label></li>
+      <li><input type="checkbox" id="opt-direct">
+          <label for="opt-direct"><kbd>Alt</kbd> なしの単独キーでも操作する（スクリーンリーダ利用時は非推奨）</label></li>
+    </ul>
+    <p class="hint">
+      固定キー方式は、<kbd>Alt</kbd> を押して離すと5秒間だけ「入力待ち」になり、
+      その間に押したキーが <kbd>Alt</kbd> との同時押しとして扱われます。
+      Windows のキーボード設定にある「固定キー機能」とは独立して動きます。
+    </p>
+    <p>
+      <label for="layout-auto-label">キーボード配列</label>
+    </p>
+    <ul class="options" id="layout-auto-label">
+      <li><input type="radio" id="ly-auto" name="layout" value="auto">
+          <label for="ly-auto">自動判定（既定）</label></li>
+      <li><input type="radio" id="ly-jis" name="layout" value="jis">
+          <label for="ly-jis">日本語配列（JIS）</label></li>
+      <li><input type="radio" id="ly-us" name="layout" value="us">
+          <label for="ly-us">英語配列（US）</label></li>
+    </ul>
+  </fieldset>
+
+  <h2>3. 試験の設定</h2>
+  <fieldset>
+    <legend>試験</legend>
+    <p class="field">
+      <label for="opt-time-limit">制限時間（分。0 で時間制限なし）</label>
+      <input type="number" id="opt-time-limit" min="0" max="300" step="1" inputmode="numeric">
+    </p>
+    <p>問題を移動したときの読み上げ</p>
+    <ul class="options">
+      <li><input type="radio" id="ar-full" name="auto-read" value="full">
+          <label for="ar-full">問題番号・状態に続けて問題文と選択肢も読む（既定）</label></li>
+      <li><input type="radio" id="ar-num" name="auto-read" value="number">
+          <label for="ar-num">問題番号と解答状態だけ読む</label></li>
+    </ul>
+    <p class="field">
+      <label for="exam-file">問題ファイル（JSON）を読み込む</label>
+      <input type="file" id="exam-file" accept="application/json,.json">
+    </p>
+    <p id="exam-file-status" class="hint" role="status">
+      読み込まない場合は、内蔵のサンプル問題（10問）で受験します。
+    </p>
+  </fieldset>
+
+  <h2>4. 画面の見え方</h2>
+  <fieldset>
+    <legend>表示</legend>
+    <ul class="options">
+      <li><input type="radio" id="ct-normal" name="contrast" value="normal">
+          <label for="ct-normal">標準（明るい・暗いはお使いの環境の設定に従う）</label></li>
+      <li><input type="radio" id="ct-high" name="contrast" value="high">
+          <label for="ct-high">ハイコントラスト（黒地に黄色）</label></li>
+    </ul>
+    <p class="field">
+      <label for="opt-font-scale">文字の大きさ（1.0〜3.0倍）</label>
+      <input type="number" id="opt-font-scale" min="1" max="3" step="0.1" inputmode="decimal">
+    </p>
+  </fieldset>
+
+  <h2>5. 開始する</h2>
+  <p id="resume-info" class="hint"></p>
+  <p class="actions">
+    <button type="button" id="btn-start" class="primary">試験を開始する</button>
+    <button type="button" id="btn-resume" hidden>前回の続きから再開する</button>
+  </p>
+
+  <h2>キー割当て一覧</h2>
+  <p class="hint">すべて <kbd>Alt</kbd> と同時に押します。試験中は <kbd>Alt</kbd>+<kbd>H</kbd> でも読み上げます。</p>
+  <p class="hint">
+    上段が問題文、中段が選択肢、下段が解答、左手側が移動という並びです。
+    次の図は、その並びをキーボードの位置のまま示したものです（同じ内容は下の表にもあります）。
+  </p>
+  <div id="key-map" class="kbd-map"></div>
+  <div id="key-tables-start" class="key-tables"></div>
+  <p class="hint">
+    Chrome と Edge がブラウザ自身で使うため、割当てを避けたキー:
+    <kbd>Alt</kbd>+<kbd>D</kbd>（アドレスバー）、<kbd>Alt</kbd>+<kbd>E</kbd> と <kbd>Alt</kbd>+<kbd>F</kbd>（メニュー）、
+    <kbd>Alt</kbd>+<kbd>Home</kbd>、<kbd>Alt</kbd>+<kbd>←</kbd>、<kbd>Alt</kbd>+<kbd>→</kbd>。
+  </p>
+</section>
+
+<!-- ======================= 試験画面 ======================= -->
+<section id="screen-exam" aria-labelledby="exam-title" hidden>
+  <div id="exam-app" tabindex="-1" aria-label="模擬検定 解答画面">
+
+    <header class="exam-header">
+      <h1 id="exam-title">模擬検定</h1>
+      <p class="statusbar">
+        <span id="question-progress">1 / 1 問</span>
+        <span id="answer-state">未解答</span>
+        <span id="unanswered-count"></span>
+        <span id="timer">--:--</span>
+        <span id="sticky-indicator" hidden>固定キー：有効（Alt を押して離してからキー）</span>
+      </p>
+    </header>
+
+    <article class="question" aria-labelledby="question-heading">
+      <h2 id="question-heading">問 1</h2>
+      <div id="question-text" class="question-text"></div>
+      <div id="question-figures" class="figures" hidden></div>
+
+      <fieldset class="choices">
+        <legend>解答を選んでください</legend>
+        <ul id="choice-list"></ul>
+      </fieldset>
+    </article>
+
+    <p class="actions">
+      <button type="button" id="btn-prev">前の問題（Alt+B）</button>
+      <button type="button" id="btn-read">問題文を読む（Alt+Y）</button>
+      <button type="button" id="btn-next">次の問題（Alt+N）</button>
+      <button type="button" id="btn-finish">試験を終了する（Alt+Q）</button>
+    </p>
+
+    <details id="key-help-details">
+      <summary>キー割当て一覧（Alt+H で読み上げ）</summary>
+      <div id="key-tables" class="key-tables"></div>
+    </details>
+
+    <section aria-labelledby="log-heading" class="log-section">
+      <h2 id="log-heading">読み上げた内容</h2>
+      <p class="hint">直近30件を表示します。スクリーンリーダの読み上げを目で確認するための欄です。</p>
+      <ul id="speech-log" class="speech-log"></ul>
+    </section>
+  </div>
+</section>
+
+<!-- ======================= 結果画面 ======================= -->
+<section id="screen-result" aria-labelledby="result-heading" hidden>
+  <h1 id="result-heading" tabindex="-1">採点結果</h1>
+  <dl id="result-summary" class="summary"></dl>
+  <p class="actions">
+    <button type="button" id="btn-retry">最初の画面に戻る（Alt+Q）</button>
+  </p>
+  <h2>各問の正誤と解説</h2>
+  <ol id="result-list" class="result-list"></ol>
+</section>
+
+</main>
+
+<footer>
+  <p class="hint">
+    キー割当ては、視覚障害者向け「日商PC検定3級」模擬検定システム（日本視覚障害者職能開発センター）の
+    操作方法を参考に、情報処理技術者試験向けに再構成したものです。
+    日商PC検定からの変更点は、未回答ジャンプを <kbd>F</kbd>・<kbd>D</kbd> から <kbd>X</kbd>・<kbd>Z</kbd> へ移した点。
+    新設は <kbd>[</kbd> <kbd>]</kbd> <kbd>R</kbd> <kbd>C</kbd> <kbd>H</kbd> の5つです。
+  </p>
+</footer>
+
+<script>
+/*
+ * keymap.js - キー割当ての定義と解決
+ *
+ * すべて Alt との同時押し（固定キー方式では Alt を押して離してから単独押し）。
+ * Chrome / Edge を前提とし、ブラウザが奪う Alt+D（アドレスバー）、Alt+E / Alt+F
+ * （メニュー）、Alt+Home、Alt+左右矢印 は使用しない。
+ *
+ * 照合は次の順で行う:
+ *   1. event.key（文字）… JIS でも US でもほぼこれで解決できる
+ *   2. event.code（物理キー）… macOS の Option 合成文字や IME 環境の保険。
+ *      記号キーは JIS と US で位置が違うため、layout 設定（auto/jis/us）で切替える。
+ */
+(function (global) {
+  'use strict';
+
+  /**
+   * @type {Array<{group:string, action:string, keyLabel:string, desc:string,
+   *               keys:string[], code?:string, codeJis?:string, codeUs?:string}>}
+   */
+  var ENTRIES = [
+    // ── 問題文（上段、左から右へ） ────────────────────────────────
+    { group: '問題文', action: 'readAll',        keyLabel: 'Y', desc: '問題文の全文を読む',           keys: ['y'], code: 'KeyY' },
+    { group: '問題文', action: 'readSentence1',  keyLabel: 'U', desc: '問題文の1センテンス目',        keys: ['u'], code: 'KeyU' },
+    { group: '問題文', action: 'readSentence2',  keyLabel: 'I', desc: '問題文の2センテンス目',        keys: ['i'], code: 'KeyI' },
+    { group: '問題文', action: 'readSentence3',  keyLabel: 'O', desc: '問題文の3センテンス目',        keys: ['o'], code: 'KeyO' },
+    { group: '問題文', action: 'readSentence4',  keyLabel: 'P', desc: '問題文の4センテンス目',        keys: ['p'], code: 'KeyP' },
+    { group: '問題文', action: 'readSentence5',  keyLabel: '@', desc: '問題文の5センテンス目',        keys: ['@'], codeJis: 'BracketLeft',  codeUs: 'Quote' },
+    { group: '問題文', action: 'readNextSentence', keyLabel: '[', desc: '次のセンテンスを読む（6文目以降はここで送る）', keys: ['['], codeJis: 'BracketRight', codeUs: 'BracketLeft' },
+    { group: '問題文', action: 'readNextFigure',   keyLabel: ']', desc: '図の説明を読む（図が複数あれば押すたびに次の図へ）', keys: [']'], codeJis: 'Backslash',    codeUs: 'BracketRight' },
+
+    // ── 選択肢を読む（中段） ──────────────────────────────────────
+    { group: '選択肢を読む', action: 'readChoice0', keyLabel: 'J', desc: '選択肢アを読む', keys: ['j'], code: 'KeyJ' },
+    { group: '選択肢を読む', action: 'readChoice1', keyLabel: 'K', desc: '選択肢イを読む', keys: ['k'], code: 'KeyK' },
+    { group: '選択肢を読む', action: 'readChoice2', keyLabel: 'L', desc: '選択肢ウを読む', keys: ['l'], code: 'KeyL' },
+    { group: '選択肢を読む', action: 'readChoice3', keyLabel: ';', desc: '選択肢エを読む', keys: [';'], code: 'Semicolon' },
+
+    // ── 解答する（下段） ──────────────────────────────────────────
+    { group: '解答する', action: 'answer0', keyLabel: 'M', desc: '解答アを選択', keys: ['m'], code: 'KeyM' },
+    { group: '解答する', action: 'answer1', keyLabel: ',', desc: '解答イを選択', keys: [','], code: 'Comma' },
+    { group: '解答する', action: 'answer2', keyLabel: '.', desc: '解答ウを選択', keys: ['.'], code: 'Period' },
+    { group: '解答する', action: 'answer3', keyLabel: '/', desc: '解答エを選択', keys: ['/'], code: 'Slash' },
+    { group: '解答する', action: 'clearAnswer', keyLabel: 'C', desc: '選択を解除', keys: ['c'], code: 'KeyC' },
+
+    // ── 移動（左手） ──────────────────────────────────────────────
+    { group: '移動', action: 'nextQuestion',      keyLabel: 'N', desc: '次の問題',           keys: ['n'], code: 'KeyN' },
+    { group: '移動', action: 'prevQuestion',      keyLabel: 'B', desc: '前の問題',           keys: ['b'], code: 'KeyB' },
+    { group: '移動', action: 'firstQuestion',     keyLabel: 'A', desc: '問題1番へ',          keys: ['a'], code: 'KeyA' },
+    { group: '移動', action: 'lastQuestion',      keyLabel: 'S', desc: '最終問題へ',          keys: ['s'], code: 'KeyS' },
+    { group: '移動', action: 'nextUnanswered',    keyLabel: 'X', desc: '後ろの未回答問題へ',   keys: ['x'], code: 'KeyX' },
+    { group: '移動', action: 'prevUnanswered',    keyLabel: 'Z', desc: '前の未回答問題へ',     keys: ['z'], code: 'KeyZ' },
+
+    // ── 情報を聞く ────────────────────────────────────────────────
+    { group: '情報を聞く', action: 'readStatus',    keyLabel: 'R', desc: '現在の状態を読む（例「問23、100問中。イを選択中」）', keys: ['r'], code: 'KeyR' },
+    { group: '情報を聞く', action: 'readTime',      keyLabel: 'T', desc: '残り時間',            keys: ['t'], code: 'KeyT' },
+    { group: '情報を聞く', action: 'readUnanswered', keyLabel: 'G', desc: '未回答問題の番号をすべて聞く', keys: ['g'], code: 'KeyG' },
+    { group: '情報を聞く', action: 'readKeyHelp',   keyLabel: 'H', desc: 'キー一覧を読む',       keys: ['h'], code: 'KeyH' },
+    { group: '情報を聞く', action: 'quit',          keyLabel: 'Q', desc: '終了',               keys: ['q'], code: 'KeyQ' }
+  ];
+
+  var GROUP_ORDER = ['問題文', '選択肢を読む', '解答する', '移動', '情報を聞く'];
+
+  /* ブラウザに予約されていて使ってはいけない組み合わせ（説明・検証用） */
+  var RESERVED = [
+    { keyLabel: 'D', reason: 'アドレスバーへ移動' },
+    { keyLabel: 'E', reason: 'ブラウザメニュー' },
+    { keyLabel: 'F', reason: 'ブラウザメニュー' },
+    { keyLabel: 'Home', reason: 'ホームページへ移動' },
+    { keyLabel: '←', reason: '戻る' },
+    { keyLabel: '→', reason: '進む' }
+  ];
+
+  /* ---- 照合テーブルの構築 -------------------------------------------- */
+  var byKey = Object.create(null);
+  ENTRIES.forEach(function (e) {
+    e.keys.forEach(function (k) { byKey[k] = e; });
+  });
+
+  function codeFor(entry, layout) {
+    if (entry.code) return entry.code;
+    return layout === 'us' ? entry.codeUs : entry.codeJis;
+  }
+
+  /** レイアウト自動判定の結果（'jis' | 'us' | null） */
+  var detectedLayout = null;
+
+  /**
+   * 押されたキーから物理配列を推定する。記号キーの key と code の対応で判る。
+   * 例: key='@' かつ code='BracketLeft' なら JIS、key='[' かつ code='BracketLeft' なら US。
+   * 判定材料が現れるたびに更新する（配列を切り替えた場合に追随できるように）。
+   */
+  function detectLayout(ev) {
+    if (ev.code === 'BracketLeft') {
+      if (ev.key === '@') detectedLayout = 'jis';
+      else if (ev.key === '[') detectedLayout = 'us';
+    } else if (ev.code === 'BracketRight') {
+      if (ev.key === '[') detectedLayout = 'jis';
+      else if (ev.key === ']') detectedLayout = 'us';
+    }
+    return detectedLayout;
+  }
+
+  /**
+   * KeyboardEvent から実行すべき action 名を返す。該当なしなら null。
+   * @param {KeyboardEvent} ev
+   * @param {'auto'|'jis'|'us'} layoutSetting
+   */
+  function resolve(ev, layoutSetting) {
+    detectLayout(ev);
+
+    // 1) 文字での照合
+    if (typeof ev.key === 'string' && ev.key.length === 1) {
+      var hit = byKey[ev.key.toLowerCase()];
+      if (hit) return hit.action;
+    }
+
+    // 2) 物理キーでの照合
+    var layout = layoutSetting === 'auto' ? (detectedLayout || 'jis') : layoutSetting;
+    for (var i = 0; i < ENTRIES.length; i++) {
+      if (codeFor(ENTRIES[i], layout) === ev.code) return ENTRIES[i].action;
+    }
+    return null;
+  }
+
+  /** グループごとにまとめた一覧を返す（画面表示・読み上げ用） */
+  function grouped() {
+    return GROUP_ORDER.map(function (g) {
+      return {
+        group: g,
+        entries: ENTRIES.filter(function (e) { return e.group === g; })
+      };
+    });
+  }
+
+  /** キー一覧の読み上げ文を組み立てる */
+  function helpText() {
+    var parts = ['キー一覧です。すべて Alt キーと同時に押します。'];
+    grouped().forEach(function (g) {
+      parts.push(g.group + '。');
+      g.entries.forEach(function (e) {
+        parts.push('Alt プラス ' + spoken(e.keyLabel) + '、' + e.desc + '。');
+      });
+    });
+    return parts.join(' ');
+  }
+
+  /** 記号キーは音声で判りにくいので読みを補う */
+  var SPOKEN = {
+    '@': 'アットマーク', '[': '左角かっこ', ']': '右角かっこ',
+    ';': 'セミコロン', ',': 'カンマ', '.': 'ピリオド', '/': 'スラッシュ'
+  };
+  function spoken(label) { return SPOKEN[label] || label; }
+
+  /* ---- キー配列図 ------------------------------------------------------
+     割当ての理屈は物理キーの位置そのもの（問題文＝上段、選択肢＝中段、
+     解答＝下段、移動＝左手）なので、キーボードの並びで示せるようにする。 */
+  var ROWS = [
+    { indent: 0, caps: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', ']'] },
+    { indent: 1, caps: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';'] },
+    { indent: 2, caps: ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/'] }
+  ];
+
+  var ROLE_OF_GROUP = {
+    '問題文': 'question',
+    '選択肢を読む': 'choice',
+    '解答する': 'answer',
+    '移動': 'move',
+    '情報を聞く': 'info'
+  };
+
+  var ROLE_LABELS = [
+    ['question', '問題文を読む'],
+    ['choice', '選択肢を読む'],
+    ['answer', '解答する'],
+    ['move', '移動する'],
+    ['info', '情報を聞く'],
+    ['reserved', 'ブラウザが使うため未割当て'],
+    ['unused', '未使用']
+  ];
+
+  /* 図の中は狭いので、短い呼び名を別に持つ */
+  var SHORT = {
+    readAll: '全文', readSentence1: '1文', readSentence2: '2文', readSentence3: '3文',
+    readSentence4: '4文', readSentence5: '5文', readNextSentence: '次の文', readNextFigure: '図',
+    readChoice0: '読ア', readChoice1: '読イ', readChoice2: '読ウ', readChoice3: '読エ',
+    answer0: '答ア', answer1: '答イ', answer2: '答ウ', answer3: '答エ', clearAnswer: '解除',
+    nextQuestion: '次問', prevQuestion: '前問', firstQuestion: '先頭', lastQuestion: '末尾',
+    nextUnanswered: '次の未', prevUnanswered: '前の未',
+    readStatus: '状態', readTime: '時間', readUnanswered: '未一覧', readKeyHelp: 'キー', quit: '終了'
+  };
+
+  var byLabel = Object.create(null);
+  ENTRIES.forEach(function (e) { byLabel[e.keyLabel] = e; });
+  var reservedByLabel = Object.create(null);
+  RESERVED.forEach(function (r) { reservedByLabel[r.keyLabel] = r; });
+
+  /** キー配列図のためのデータ（行 × キー）を返す */
+  function layoutRows() {
+    return ROWS.map(function (row) {
+      return {
+        indent: row.indent,
+        keys: row.caps.map(function (cap) {
+          var e = byLabel[cap];
+          if (e) return { cap: cap, role: ROLE_OF_GROUP[e.group], use: SHORT[e.action] || '', title: e.desc };
+          var r = reservedByLabel[cap];
+          if (r) return { cap: cap, role: 'reserved', use: r.reason, title: 'Alt+' + cap + ' は' + r.reason };
+          return { cap: cap, role: 'unused', use: '', title: '' };
+        })
+      };
+    });
+  }
+
+  global.IPExamKeymap = {
+    layoutRows: layoutRows,
+    roleLabels: ROLE_LABELS,
+    entries: ENTRIES,
+    grouped: grouped,
+    resolve: resolve,
+    helpText: helpText,
+    spoken: spoken,
+    reserved: RESERVED,
+    get detectedLayout() { return detectedLayout; }
+  };
+})(window);
+
+</script>
+<script>
+/*
+ * speech.js - 読み上げ（スクリーンリーダ向け aria-live と、音声合成の2系統）
+ *
+ * mode:
+ *   'sr'   … aria-live のみ。スクリーンリーダ利用者の既定（二重読みを避ける）
+ *   'tts'  … Web Speech API の音声合成のみ。スクリーンリーダを使わない利用者向け
+ *   'both' … 両方
+ */
+(function (global) {
+  'use strict';
+
+  var Speaker = {
+    mode: 'sr',
+    rate: 1.3,
+    volume: 1.0,
+    voice: null,
+    _regions: [],
+    _regionIndex: 0,
+    _logEl: null,
+    _log: [],
+    _onLog: null,
+
+    /**
+     * @param {{politeA:HTMLElement, politeB:HTMLElement, assertive:HTMLElement, log:HTMLElement}} els
+     */
+    init: function (els) {
+      // 同じ文言を続けて読ませるため、2つの live region を交互に使う
+      this._regions = [els.politeA, els.politeB];
+      this._assertive = els.assertive;
+      this._logEl = els.log;
+      this._loadVoices();
+      if ('speechSynthesis' in global) {
+        global.speechSynthesis.addEventListener('voiceschanged', this._loadVoices.bind(this));
+      }
+    },
+
+    _loadVoices: function () {
+      if (!('speechSynthesis' in global)) return;
+      var voices = global.speechSynthesis.getVoices() || [];
+      var ja = voices.filter(function (v) { return /^ja/i.test(v.lang); });
+      this.voice = ja[0] || null;
+    },
+
+    ttsAvailable: function () { return 'speechSynthesis' in global; },
+
+    /**
+     * 読み上げる。
+     * @param {string} text
+     * @param {{assertive?:boolean, interrupt?:boolean, silent?:boolean}} [opts]
+     */
+    speak: function (text, opts) {
+      opts = opts || {};
+      if (!text) return;
+      this._appendLog(text);
+      if (opts.silent) return;
+
+      if (this.mode === 'sr' || this.mode === 'both') this._live(text, !!opts.assertive);
+      if (this.mode === 'tts' || this.mode === 'both') this._tts(text, opts.interrupt !== false);
+    },
+
+    _live: function (text, assertive) {
+      if (assertive && this._assertive) {
+        this._assertive.textContent = '';
+        var a = this._assertive;
+        global.setTimeout(function () { a.textContent = text; }, 30);
+        return;
+      }
+      var regions = this._regions;
+      if (!regions.length) return;
+      var cur = regions[this._regionIndex];
+      var other = regions[1 - this._regionIndex];
+      other.textContent = '';
+      this._regionIndex = 1 - this._regionIndex;
+      cur.textContent = '';
+      global.setTimeout(function () { cur.textContent = text; }, 30);
+    },
+
+    _tts: function (text, interrupt) {
+      if (!this.ttsAvailable()) return;
+      if (interrupt) global.speechSynthesis.cancel();
+      var u = new global.SpeechSynthesisUtterance(text);
+      u.lang = 'ja-JP';
+      u.rate = this.rate;
+      u.volume = this.volume;
+      if (this.voice) u.voice = this.voice;
+      global.speechSynthesis.speak(u);
+    },
+
+    /** 読み上げを止める */
+    stop: function () {
+      if (this.ttsAvailable()) global.speechSynthesis.cancel();
+    },
+
+    _appendLog: function (text) {
+      this._log.push(text);
+      if (this._log.length > 30) this._log.shift();
+      if (!this._logEl) return;
+      var li = document.createElement('li');
+      li.textContent = text;
+      this._logEl.appendChild(li);
+      while (this._logEl.children.length > 30) {
+        this._logEl.removeChild(this._logEl.firstChild);
+      }
+      this._logEl.scrollTop = this._logEl.scrollHeight;
+    },
+
+    clearLog: function () {
+      this._log = [];
+      if (this._logEl) this._logEl.textContent = '';
+    }
+  };
+
+  global.IPExamSpeaker = Speaker;
+})(window);
+
+</script>
+<script>
+/*
+ * data.js - 模擬問題データ（情報処理技術者試験の形式にならった自作問題）
+ *
+ * 問題文は「センテンス（文）の配列」で持つ。Alt+U〜Alt+@ と Alt+[ は
+ * この配列の要素を1つずつ読む。図は figures に文章で説明を持たせる。
+ */
+(function (global) {
+  'use strict';
+
+  global.IPExamSampleData = {
+    title: '情報処理技術者試験 模擬検定（サンプル10問）',
+    timeLimitSec: 30 * 60,
+    questions: [
+      {
+        text: [
+          '2進数の 1011 を10進数で表したものはどれか。',
+          'なお、この2進数は符号なし整数を表すものとする。'
+        ],
+        choices: ['9', '11', '13', '15'],
+        answer: 1,
+        explanation: '1011 は 1×8 + 0×4 + 1×2 + 1×1 = 11 である。'
+      },
+      {
+        text: [
+          'スタックの説明として、適切なものはどれか。'
+        ],
+        choices: [
+          '最初に格納したデータを最初に取り出す。',
+          '最後に格納したデータを最初に取り出す。',
+          '優先度の高いデータを最初に取り出す。',
+          '任意の位置のデータを添字で直接取り出す。'
+        ],
+        answer: 1,
+        explanation: 'スタックは後入先出（LIFO）。先入先出（FIFO）はキューである。'
+      },
+      {
+        text: [
+          'IPv4 のネットワークアドレスが 192.168.1.0、サブネットマスクが 255.255.255.0 である。',
+          'このネットワークに接続できるホストの最大数はいくつか。',
+          'ネットワークアドレスとブロードキャストアドレスは除いて数えるものとする。'
+        ],
+        choices: ['128', '254', '255', '256'],
+        answer: 1,
+        explanation: 'ホスト部は8ビットなので 2の8乗＝256。ネットワークアドレスとブロードキャストアドレスを除いて254台。'
+      },
+      {
+        text: [
+          '関係データベースにおける主キーの説明として、適切なものはどれか。'
+        ],
+        choices: [
+          '表の中の行を一意に識別するための列、または列の組である。',
+          '他の表の主キーを参照する列である。',
+          '検索を高速化するために作成する索引である。',
+          '複数の表を結合するときに使う一時的な作業表である。'
+        ],
+        answer: 0,
+        explanation: 'イは外部キー、ウはインデックス、エは一時表の説明である。'
+      },
+      {
+        text: [
+          '図は、ある企業の社内ネットワークの構成を示したものである。',
+          '営業部のPCから、インターネット上のWebサーバへアクセスするとき、通信が必ず経由する機器はどれか。',
+          '経路上の機器はすべて正常に動作しているものとする。'
+        ],
+        figures: [
+          {
+            label: '図　社内ネットワーク構成',
+            description: '営業部のPCと開発部のPCが、それぞれ社内スイッチに接続されている。社内スイッチはファイアウォールに接続され、ファイアウォールはルータを介してインターネットにつながっている。ファイル サーバは社内スイッチに直接接続されており、インターネット側には接続されていない。'
+          }
+        ],
+        choices: ['ファイルサーバ', '開発部のPC', 'ファイアウォールとルータ', '社内スイッチのみ'],
+        answer: 2,
+        explanation: '図では、インターネットへ出る経路は 社内スイッチ、ファイアウォール、ルータ の順である。ファイルサーバや開発部のPCは経由しない。'
+      },
+      {
+        text: [
+          '稼働率が 0.9 の装置を2台直列に接続したシステムがある。',
+          'このシステム全体の稼働率はいくつか。',
+          'ここで、2台の装置の故障は互いに独立であるとする。'
+        ],
+        choices: ['0.81', '0.90', '0.95', '0.99'],
+        answer: 0,
+        explanation: '直列システムの稼働率は各装置の稼働率の積。0.9 × 0.9 = 0.81。'
+      },
+      {
+        text: [
+          '公開鍵暗号方式を用いて、送信者が受信者へ文書を暗号化して送る。',
+          'このとき、送信者が暗号化に使う鍵はどれか。'
+        ],
+        choices: [
+          '送信者の公開鍵',
+          '送信者の秘密鍵',
+          '受信者の公開鍵',
+          '受信者の秘密鍵'
+        ],
+        answer: 2,
+        explanation: '受信者の公開鍵で暗号化すれば、対応する受信者の秘密鍵でしか復号できない。'
+      },
+      {
+        text: [
+          'アジャイル開発の特徴として、適切なものはどれか。'
+        ],
+        choices: [
+          '要件定義から順に工程を進め、前の工程には戻らないことを原則とする。',
+          '短い期間の反復を繰り返し、動くソフトウェアを継続的に提供する。',
+          '設計書をすべて完成させてから、実装を一括して開始する。',
+          '利用者との接触を開発終了時のみに限定する。'
+        ],
+        answer: 1,
+        explanation: 'ア・ウはウォーターフォールモデルの説明。エはアジャイルの考え方と正反対である。'
+      },
+      {
+        text: [
+          '図は、あるシステムの状態遷移を示したものである。',
+          '状態「待機中」から始めて、イベントを 開始、一時停止、再開、終了 の順に発生させたとき、最後の状態はどれか。'
+        ],
+        figures: [
+          {
+            label: '図　状態遷移図',
+            description: '状態は 待機中、実行中、停止中、終了 の4つ。待機中でイベント 開始 が起きると 実行中 へ遷移する。実行中でイベント 一時停止 が起きると 停止中 へ遷移する。停止中でイベント 再開 が起きると 実行中 へ戻る。実行中でイベント 終了 が起きると 終了 へ遷移する。'
+          }
+        ],
+        choices: ['待機中', '実行中', '停止中', '終了'],
+        answer: 3,
+        explanation: '待機中→（開始）→実行中→（一時停止）→停止中→（再開）→実行中→（終了）→終了。'
+      },
+      {
+        text: [
+          '個人情報保護法における個人情報の説明として、適切なものはどれか。'
+        ],
+        choices: [
+          '生存する個人に関する情報であって、特定の個人を識別できるものをいう。',
+          '氏名を含む情報だけを指し、それ以外の情報は含まない。',
+          '法人の名称や所在地も個人情報に含まれる。',
+          '本人の同意があれば、取得の目的を通知しなくてもよい。'
+        ],
+        answer: 0,
+        explanation: '個人情報は「生存する個人に関する情報で、特定の個人を識別できるもの」。法人情報は該当しない。'
+      }
+    ]
+  };
+})(window);
+
+</script>
+<script>
+/*
+ * app.js - 情報処理技術者試験 模擬検定システム（スクリーンリーダ対応）
+ *
+ * 視覚障害者向け「日商PC検定3級」模擬検定システムのキー操作を参考に、
+ * 情報処理技術者試験の形式（四肢択一）へ割り当て直したもの。
+ * すべての操作は Alt との同時押し、または固定キー方式（Alt を押して離してから単独押し）。
+ */
+(function (global) {
+  'use strict';
+
+  var Keymap = global.IPExamKeymap;
+  var Speaker = global.IPExamSpeaker;
+
+  var CHOICE_LABELS = ['ア', 'イ', 'ウ', 'エ'];
+  var SETTINGS_KEY = 'ipexam.settings.v1';
+  var SESSION_KEY = 'ipexam.session.v1';
+  var QUIT_CONFIRM_MS = 15000;
+  var STICKY_MS = 5000;
+
+  var App = {
+    /* ---- 状態 ------------------------------------------------------- */
+    screen: 'start',           // 'start' | 'exam' | 'result'
+    exam: null,                // 読み込んだ問題セット
+    answers: [],               // 各問の選択（0-3 または null）
+    current: 0,
+    sentenceCursor: 0,         // Alt+[ 用のセンテンス位置
+    figureCursor: 0,           // Alt+] 用の図の位置
+    startedAt: 0,
+    endsAt: 0,                 // 0 なら時間制限なし
+    timerId: null,
+    warned: {},
+    quitPendingUntil: 0,
+    stickyArmedUntil: 0,
+    _altSolo: false,
+
+    settings: {
+      speechMode: 'sr',        // 'sr' | 'tts' | 'both'
+      rate: 1.3,
+      sticky: false,           // 固定キー方式
+      directKeys: false,       // Alt なしでも操作（スクリーンリーダ利用時は非推奨）
+      appMode: true,           // role="application"（スクリーンリーダのキー操作を無効化）
+      autoRead: 'full',        // 'full' | 'number' 問題移動時の読み上げ
+      layout: 'auto',          // 'auto' | 'jis' | 'us'
+      timeLimitMin: 30,
+      contrast: 'normal',      // 'normal' | 'high'
+      fontScale: 1
+    },
+
+    /* ---- 初期化 ----------------------------------------------------- */
+    init: function () {
+      this.el = {
+        screens: {
+          start: document.getElementById('screen-start'),
+          exam: document.getElementById('screen-exam'),
+          result: document.getElementById('screen-result')
+        },
+        examApp: document.getElementById('exam-app'),
+        examTitle: document.getElementById('exam-title'),
+        qHeading: document.getElementById('question-heading'),
+        qProgress: document.getElementById('question-progress'),
+        qText: document.getElementById('question-text'),
+        qFigures: document.getElementById('question-figures'),
+        choices: document.getElementById('choice-list'),
+        answerState: document.getElementById('answer-state'),
+        timer: document.getElementById('timer'),
+        unansweredCount: document.getElementById('unanswered-count'),
+        stickyIndicator: document.getElementById('sticky-indicator'),
+        resultSummary: document.getElementById('result-summary'),
+        resultList: document.getElementById('result-list'),
+        keyTables: document.getElementById('key-tables'),
+        keyTablesStart: document.getElementById('key-tables-start'),
+        log: document.getElementById('speech-log'),
+        fileInput: document.getElementById('exam-file'),
+        fileStatus: document.getElementById('exam-file-status'),
+        resumeBtn: document.getElementById('btn-resume'),
+        resumeInfo: document.getElementById('resume-info')
+      };
+
+      Speaker.init({
+        politeA: document.getElementById('live-a'),
+        politeB: document.getElementById('live-b'),
+        assertive: document.getElementById('live-assertive'),
+        log: this.el.log
+      });
+
+      this.loadSettings();
+      this.bindSettingsUI();
+      this.applySettings();
+      this.renderKeyTables(this.el.keyTables);
+      this.renderKeyTables(this.el.keyTablesStart);
+      this.renderKeyMap(document.getElementById('key-map'));
+      this.bindButtons();
+      this.bindKeys();
+      this.exam = this.normalizeExam(global.IPExamSampleData);
+      this.showResumeOption();
+      this.show('start');
+    },
+
+    /* ---- 設定 ------------------------------------------------------- */
+    loadSettings: function () {
+      try {
+        var raw = global.localStorage.getItem(SETTINGS_KEY);
+        if (raw) {
+          var saved = JSON.parse(raw);
+          for (var k in saved) {
+            if (Object.prototype.hasOwnProperty.call(this.settings, k)) this.settings[k] = saved[k];
+          }
+        }
+      } catch (e) { /* localStorage が使えない環境では既定値のまま */ }
+    },
+
+    saveSettings: function () {
+      try {
+        global.localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.settings));
+      } catch (e) { /* 無視 */ }
+    },
+
+    bindSettingsUI: function () {
+      var self = this;
+
+      function radios(name, prop, cast) {
+        var list = document.querySelectorAll('input[name="' + name + '"]');
+        Array.prototype.forEach.call(list, function (input) {
+          input.checked = String(self.settings[prop]) === input.value;
+          input.addEventListener('change', function () {
+            if (!input.checked) return;
+            self.settings[prop] = cast ? cast(input.value) : input.value;
+            self.applySettings();
+            self.saveSettings();
+          });
+        });
+      }
+
+      function checkbox(id, prop) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.checked = !!self.settings[prop];
+        input.addEventListener('change', function () {
+          self.settings[prop] = input.checked;
+          self.applySettings();
+          self.saveSettings();
+        });
+      }
+
+      function number(id, prop, cast) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.value = self.settings[prop];
+        input.addEventListener('change', function () {
+          var v = cast(input.value);
+          if (!isNaN(v)) {
+            self.settings[prop] = v;
+            self.applySettings();
+            self.saveSettings();
+          }
+        });
+      }
+
+      radios('speech-mode', 'speechMode');
+      radios('auto-read', 'autoRead');
+      radios('layout', 'layout');
+      radios('contrast', 'contrast');
+      checkbox('opt-sticky', 'sticky');
+      checkbox('opt-direct', 'directKeys');
+      checkbox('opt-appmode', 'appMode');
+      number('opt-time-limit', 'timeLimitMin', parseInt);
+      number('opt-rate', 'rate', parseFloat);
+      number('opt-font-scale', 'fontScale', parseFloat);
+
+      var ttsNote = document.getElementById('tts-note');
+      if (ttsNote && !Speaker.ttsAvailable()) {
+        ttsNote.textContent = 'このブラウザは音声合成（Web Speech API）に対応していません。スクリーンリーダでの読み上げをご利用ください。';
+      }
+    },
+
+    applySettings: function () {
+      Speaker.mode = this.settings.speechMode;
+      Speaker.rate = this.settings.rate;
+      document.documentElement.setAttribute('data-contrast', this.settings.contrast);
+      document.documentElement.style.setProperty('--font-scale', this.settings.fontScale);
+      if (this.el.examApp) {
+        if (this.settings.appMode && this.screen === 'exam') {
+          this.el.examApp.setAttribute('role', 'application');
+        } else {
+          this.el.examApp.removeAttribute('role');
+        }
+      }
+      if (this.el.stickyIndicator) {
+        this.el.stickyIndicator.hidden = !this.settings.sticky;
+      }
+    },
+
+    /* ---- 問題セット ------------------------------------------------- */
+    normalizeExam: function (data) {
+      if (!data || !Array.isArray(data.questions) || !data.questions.length) {
+        throw new Error('問題データが不正です。');
+      }
+      var questions = data.questions.map(function (q, i) {
+        var text = Array.isArray(q.text) ? q.text.slice()
+          : String(q.text || '').split(/(?<=。)/).filter(function (s) { return s.trim(); });
+        var choices = (q.choices || []).slice(0, 4);
+        while (choices.length < 4) choices.push('（選択肢なし）');
+        return {
+          number: i + 1,
+          text: text,
+          figures: Array.isArray(q.figures) ? q.figures : [],
+          choices: choices,
+          answer: typeof q.answer === 'number' ? q.answer : null,
+          explanation: q.explanation || ''
+        };
+      });
+      return {
+        title: data.title || '模擬検定',
+        timeLimitSec: typeof data.timeLimitSec === 'number' ? data.timeLimitSec : null,
+        questions: questions
+      };
+    },
+
+    loadExamFile: function (file) {
+      var self = this;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var data = JSON.parse(String(reader.result));
+          self.exam = self.normalizeExam(data);
+          // 問題セットが制限時間を持っていれば、設定欄の初期値として反映する
+          if (self.exam.timeLimitSec) {
+            self.settings.timeLimitMin = Math.round(self.exam.timeLimitSec / 60);
+            var input = document.getElementById('opt-time-limit');
+            if (input) input.value = self.settings.timeLimitMin;
+            self.saveSettings();
+          }
+          self.el.fileStatus.textContent =
+            '読み込みました。' + self.exam.title + '（' + self.exam.questions.length + '問）';
+          Speaker.speak('問題ファイルを読み込みました。' + self.exam.title + '、' +
+            self.exam.questions.length + '問です。', { assertive: true });
+        } catch (e) {
+          self.el.fileStatus.textContent = '読み込みに失敗しました: ' + e.message;
+          Speaker.speak('問題ファイルの読み込みに失敗しました。' + e.message, { assertive: true });
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    },
+
+    /* ---- 画面遷移 --------------------------------------------------- */
+    show: function (name) {
+      this.screen = name;
+      for (var k in this.el.screens) {
+        this.el.screens[k].hidden = (k !== name);
+      }
+      this.applySettings();
+    },
+
+    /* ---- 試験の開始・再開・終了 -------------------------------------- */
+    start: function (resumed) {
+      var n = this.exam.questions.length;
+      if (!resumed) {
+        this.answers = new Array(n).fill(null);
+        this.current = 0;
+        this.startedAt = Date.now();
+        var limit = this.settings.timeLimitMin > 0 ? this.settings.timeLimitMin * 60 * 1000 : 0;
+        this.endsAt = limit ? this.startedAt + limit : 0;
+        this.warned = {};
+      }
+      this.quitPendingUntil = 0;
+      this.sentenceCursor = 0;
+      this.figureCursor = 0;
+      this.el.examTitle.textContent = this.exam.title;
+      this.show('exam');
+      this.el.examApp.focus();
+      this.startTimer();
+      this.render();
+      this.saveSession();
+
+      var intro = resumed ? '試験を再開します。' : '試験を開始します。';
+      intro += this.exam.title + '。全' + n + '問。';
+      intro += this.endsAt ? '制限時間は' + Math.round((this.endsAt - Date.now()) / 60000) + '分です。' : '時間制限はありません。';
+      intro += 'キー一覧は Alt プラス H で読み上げます。';
+      Speaker.speak(intro + ' ' + this.questionSpeech(true), { assertive: true });
+    },
+
+    startTimer: function () {
+      var self = this;
+      this.stopTimer();
+      this.timerId = global.setInterval(function () { self.tick(); }, 1000);
+      this.tick();
+    },
+
+    stopTimer: function () {
+      if (this.timerId) { global.clearInterval(this.timerId); this.timerId = null; }
+    },
+
+    tick: function () {
+      if (this.screen !== 'exam') return;
+      if (!this.endsAt) {
+        this.el.timer.textContent = '時間制限なし';
+        return;
+      }
+      var remain = Math.max(0, Math.round((this.endsAt - Date.now()) / 1000));
+      this.el.timer.textContent = '残り ' + this.clockText(remain);
+      [600, 300, 60].forEach(function (mark) {
+        if (remain <= mark && !this.warned[mark]) {
+          this.warned[mark] = true;
+          Speaker.speak('残り時間' + (mark >= 60 ? (mark / 60) + '分' : mark + '秒') + 'です。', { assertive: true });
+        }
+      }, this);
+      if (remain === 0) {
+        Speaker.speak('時間になりました。試験を終了します。', { assertive: true });
+        this.finish(true);
+      }
+    },
+
+    clockText: function (sec) {
+      var m = Math.floor(sec / 60), s = sec % 60;
+      return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    },
+
+    finish: function (auto) {
+      this.stopTimer();
+      this.quitPendingUntil = 0;
+      this.clearSession();
+      this.renderResult();
+      this.show('result');
+      var h = document.getElementById('result-heading');
+      if (h) h.focus();
+      Speaker.speak((auto ? '時間終了です。' : '試験を終了しました。') + ' ' + this.resultSpeech(), { assertive: true });
+    },
+
+    /* ---- セッション保存 ---------------------------------------------- */
+    saveSession: function () {
+      try {
+        global.localStorage.setItem(SESSION_KEY, JSON.stringify({
+          title: this.exam.title,
+          count: this.exam.questions.length,
+          answers: this.answers,
+          current: this.current,
+          endsAt: this.endsAt,
+          savedAt: Date.now()
+        }));
+      } catch (e) { /* 無視 */ }
+    },
+
+    clearSession: function () {
+      try { global.localStorage.removeItem(SESSION_KEY); } catch (e) { /* 無視 */ }
+    },
+
+    showResumeOption: function () {
+      var raw = null;
+      try { raw = global.localStorage.getItem(SESSION_KEY); } catch (e) { /* 無視 */ }
+      if (!raw) return;
+      try {
+        var s = JSON.parse(raw);
+        if (!s || s.count !== this.exam.questions.length) return;
+        if (s.endsAt && s.endsAt < Date.now()) { this.clearSession(); return; }
+        this._resume = s;
+        this.el.resumeBtn.hidden = false;
+        var answered = s.answers.filter(function (a) { return a !== null; }).length;
+        this.el.resumeInfo.textContent =
+          '前回の続き（' + s.title + '、' + answered + ' / ' + s.count + '問 解答済み）を再開できます。';
+      } catch (e) { /* 無視 */ }
+    },
+
+    resume: function () {
+      var s = this._resume;
+      if (!s) return;
+      this.answers = s.answers;
+      this.current = s.current || 0;
+      this.endsAt = s.endsAt || 0;
+      this.warned = {};
+      this.start(true);
+    },
+
+    /* ---- 描画 ------------------------------------------------------- */
+    render: function () {
+      var q = this.exam.questions[this.current];
+      var total = this.exam.questions.length;
+
+      this.el.qHeading.textContent = '問 ' + q.number;
+      this.el.qProgress.textContent = (this.current + 1) + ' / ' + total + ' 問';
+
+      this.el.qText.textContent = '';
+      q.text.forEach(function (s, i) {
+        var p = document.createElement('p');
+        p.className = 'sentence';
+        var num = document.createElement('span');
+        num.className = 'sentence-no';
+        num.setAttribute('aria-hidden', 'true');
+        num.textContent = (i + 1) + '.';
+        p.appendChild(num);
+        p.appendChild(document.createTextNode(s));
+        this.el.qText.appendChild(p);
+      }, this);
+
+      this.el.qFigures.textContent = '';
+      this.el.qFigures.hidden = !q.figures.length;
+      q.figures.forEach(function (f) {
+        var fig = document.createElement('figure');
+        var cap = document.createElement('figcaption');
+        cap.textContent = f.label || '図';
+        var p = document.createElement('p');
+        p.textContent = f.description || '';
+        fig.appendChild(cap);
+        fig.appendChild(p);
+        this.el.qFigures.appendChild(fig);
+      }, this);
+
+      this.el.choices.textContent = '';
+      q.choices.forEach(function (c, i) {
+        var li = document.createElement('li');
+        var input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'choice';
+        input.id = 'choice-' + i;
+        input.value = String(i);
+        input.checked = this.answers[this.current] === i;
+        var self = this;
+        input.addEventListener('change', function () {
+          if (input.checked) self.setAnswer(i, true);
+        });
+        var label = document.createElement('label');
+        label.setAttribute('for', input.id);
+        label.textContent = CHOICE_LABELS[i] + '　' + c;
+        li.appendChild(input);
+        li.appendChild(label);
+        this.el.choices.appendChild(li);
+      }, this);
+
+      this.updateStatusLine();
+      this.sentenceCursor = 0;
+      this.figureCursor = 0;
+    },
+
+    updateStatusLine: function () {
+      var a = this.answers[this.current];
+      this.el.answerState.textContent = a === null ? '未解答' : CHOICE_LABELS[a] + ' を選択中';
+      var un = this.unansweredNumbers();
+      this.el.unansweredCount.textContent = un.length ? '未解答 ' + un.length + ' 問' : 'すべて解答済み';
+    },
+
+    /**
+     * キー配列図を描く。割当ての理屈（上段＝問題文、中段＝選択肢、下段＝解答、
+     * 左手＝移動）は物理キーの位置そのものなので、キーボードの並びで見せる。
+     * 同じ情報はキー割当て表にもあるため、図は支援技術からは隠す。
+     */
+    renderKeyMap: function (container) {
+      if (!container) return;
+      container.textContent = '';
+      container.setAttribute('aria-hidden', 'true');
+
+      Keymap.layoutRows().forEach(function (row) {
+        var rowEl = document.createElement('div');
+        rowEl.className = 'kbd-row';
+        if (row.indent) {
+          var pad = document.createElement('span');
+          pad.className = 'indent i' + row.indent;
+          rowEl.appendChild(pad);
+        }
+        row.keys.forEach(function (k) {
+          var key = document.createElement('span');
+          key.className = 'kbd-key';
+          key.setAttribute('data-role', k.role);
+          if (k.title) key.title = k.title;
+          var cap = document.createElement('span');
+          cap.className = 'cap';
+          cap.textContent = k.cap;
+          key.appendChild(cap);
+          if (k.use) {
+            var use = document.createElement('span');
+            use.className = 'use';
+            use.textContent = k.use;
+            key.appendChild(use);
+          }
+          rowEl.appendChild(key);
+        });
+        container.appendChild(rowEl);
+      });
+
+      var legend = document.createElement('ul');
+      legend.className = 'kbd-legend';
+      Keymap.roleLabels.forEach(function (pair) {
+        var li = document.createElement('li');
+        var sw = document.createElement('span');
+        sw.className = 'swatch';
+        sw.style.background = 'var(--k-' + pair[0] + ')';
+        li.appendChild(sw);
+        li.appendChild(document.createTextNode(pair[1]));
+        legend.appendChild(li);
+      });
+      container.appendChild(legend);
+    },
+
+    renderKeyTables: function (container) {
+      if (!container) return;
+      container.textContent = '';
+      Keymap.grouped().forEach(function (g) {
+        var section = document.createElement('section');
+        section.className = 'key-group';
+        var h = document.createElement('h3');
+        h.textContent = g.group;
+        section.appendChild(h);
+        var table = document.createElement('table');
+        var caption = document.createElement('caption');
+        caption.className = 'visually-hidden';
+        caption.textContent = g.group + 'のキー割当て';
+        table.appendChild(caption);
+        var thead = document.createElement('thead');
+        thead.innerHTML = '<tr><th scope="col">キー</th><th scope="col">動作</th></tr>';
+        table.appendChild(thead);
+        var tbody = document.createElement('tbody');
+        g.entries.forEach(function (e) {
+          var tr = document.createElement('tr');
+          var th = document.createElement('th');
+          th.setAttribute('scope', 'row');
+          th.innerHTML = '<kbd>Alt</kbd> + <kbd>' + e.keyLabel
+            .replace('&', '&amp;').replace('<', '&lt;') + '</kbd>';
+          var td = document.createElement('td');
+          td.textContent = e.desc;
+          tr.appendChild(th);
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        section.appendChild(table);
+        container.appendChild(section);
+      });
+    },
+
+    renderResult: function () {
+      var qs = this.exam.questions;
+      var scored = qs.filter(function (q) { return q.answer !== null; });
+      var correct = 0;
+      qs.forEach(function (q, i) {
+        if (q.answer !== null && this.answers[i] === q.answer) correct++;
+      }, this);
+      var answered = this.answers.filter(function (a) { return a !== null; }).length;
+      var pct = scored.length ? Math.round(correct / scored.length * 100) : 0;
+
+      this.el.resultSummary.textContent = '';
+      [
+        ['問題数', qs.length + ' 問'],
+        ['解答数', answered + ' 問'],
+        ['正解数', correct + ' 問'],
+        ['得点率', pct + ' %']
+      ].forEach(function (row) {
+        var dt = document.createElement('dt'); dt.textContent = row[0];
+        var dd = document.createElement('dd'); dd.textContent = row[1];
+        this.el.resultSummary.appendChild(dt);
+        this.el.resultSummary.appendChild(dd);
+      }, this);
+
+      this.el.resultList.textContent = '';
+      qs.forEach(function (q, i) {
+        var mine = this.answers[i];
+        var ok = q.answer !== null && mine === q.answer;
+        var li = document.createElement('li');
+        li.className = ok ? 'correct' : 'incorrect';
+        var h = document.createElement('h3');
+        h.textContent = '問 ' + q.number + '：' + (q.answer === null ? '採点対象外'
+          : ok ? '正解' : (mine === null ? '未解答（不正解）' : '不正解'));
+        li.appendChild(h);
+        var p1 = document.createElement('p');
+        p1.textContent = q.text.join(' ');
+        li.appendChild(p1);
+        var p2 = document.createElement('p');
+        p2.textContent = 'あなたの解答：' + (mine === null ? 'なし' : CHOICE_LABELS[mine]) +
+          '　正解：' + (q.answer === null ? '—' : CHOICE_LABELS[q.answer]);
+        li.appendChild(p2);
+        if (q.explanation) {
+          var p3 = document.createElement('p');
+          p3.className = 'explanation';
+          p3.textContent = '解説：' + q.explanation;
+          li.appendChild(p3);
+        }
+        this.el.resultList.appendChild(li);
+      }, this);
+
+      this._score = { correct: correct, total: scored.length, answered: answered, pct: pct };
+    },
+
+    resultSpeech: function () {
+      var s = this._score;
+      return '結果です。' + this.exam.questions.length + '問中、' + s.answered + '問に解答し、' +
+        s.correct + '問正解、得点率' + s.pct + 'パーセントです。' +
+        '各問の正誤と解説を画面に表示しています。Alt プラス Q で最初の画面に戻ります。';
+    },
+
+    /* ---- 読み上げ用テキスト ------------------------------------------ */
+    q: function () { return this.exam.questions[this.current]; },
+
+    positionSpeech: function () {
+      return '問' + this.q().number + '、' + this.exam.questions.length + '問中。';
+    },
+
+    answerSpeech: function () {
+      var a = this.answers[this.current];
+      return a === null ? '未解答です。' : CHOICE_LABELS[a] + 'を選択中。';
+    },
+
+    questionSpeech: function (withText) {
+      var s = this.positionSpeech() + this.answerSpeech();
+      if (withText && this.settings.autoRead === 'full') s += ' ' + this.fullTextSpeech();
+      return s;
+    },
+
+    fullTextSpeech: function () {
+      var q = this.q();
+      var s = q.text.join(' ');
+      if (q.figures.length) {
+        s += ' 図が' + q.figures.length + '個あります。Alt プラス 右角かっこ で図の説明を読みます。';
+      }
+      s += ' 選択肢。';
+      q.choices.forEach(function (c, i) { s += CHOICE_LABELS[i] + '、' + c + ' '; });
+      return s;
+    },
+
+    unansweredNumbers: function () {
+      var list = [];
+      this.answers.forEach(function (a, i) {
+        if (a === null) list.push(this.exam.questions[i].number);
+      }, this);
+      return list;
+    },
+
+    /* ---- 操作（アクション） ------------------------------------------ */
+    actions: {
+      readAll: function () {
+        this.sentenceCursor = 0;
+        Speaker.speak(this.positionSpeech() + ' ' + this.fullTextSpeech());
+      },
+      readSentence1: function () { this.readSentence(0); },
+      readSentence2: function () { this.readSentence(1); },
+      readSentence3: function () { this.readSentence(2); },
+      readSentence4: function () { this.readSentence(3); },
+      readSentence5: function () { this.readSentence(4); },
+
+      readNextSentence: function () {
+        var q = this.q();
+        if (this.sentenceCursor >= q.text.length) {
+          this.sentenceCursor = 0;
+          Speaker.speak('問題文は以上です。もう一度押すと1センテンス目から読みます。');
+          return;
+        }
+        var i = this.sentenceCursor++;
+        Speaker.speak((i + 1) + '文目。' + q.text[i]);
+      },
+
+      readNextFigure: function () {
+        var q = this.q();
+        if (!q.figures.length) { Speaker.speak('この問題に図はありません。'); return; }
+        if (this.figureCursor >= q.figures.length) this.figureCursor = 0;
+        var f = q.figures[this.figureCursor++];
+        Speaker.speak((f.label || ('図' + this.figureCursor)) + '。' + f.description +
+          (q.figures.length > 1 ? ' 図は全部で' + q.figures.length + '個です。' : ''));
+      },
+
+      readChoice0: function () { this.readChoice(0); },
+      readChoice1: function () { this.readChoice(1); },
+      readChoice2: function () { this.readChoice(2); },
+      readChoice3: function () { this.readChoice(3); },
+
+      answer0: function () { this.setAnswer(0); },
+      answer1: function () { this.setAnswer(1); },
+      answer2: function () { this.setAnswer(2); },
+      answer3: function () { this.setAnswer(3); },
+
+      clearAnswer: function () {
+        if (this.quitPendingUntil > Date.now()) {
+          this.quitPendingUntil = 0;
+          Speaker.speak('終了を取り消しました。試験を続けます。', { assertive: true });
+          return;
+        }
+        if (this.answers[this.current] === null) { Speaker.speak('まだ解答していません。'); return; }
+        this.answers[this.current] = null;
+        this.render();
+        this.saveSession();
+        Speaker.speak('選択を解除しました。' + this.positionSpeech() + '未解答です。');
+      },
+
+      nextQuestion: function () {
+        if (this.current >= this.exam.questions.length - 1) {
+          Speaker.speak('最終問題です。これより後の問題はありません。');
+          return;
+        }
+        this.goTo(this.current + 1);
+      },
+      prevQuestion: function () {
+        if (this.current <= 0) { Speaker.speak('問1です。これより前の問題はありません。'); return; }
+        this.goTo(this.current - 1);
+      },
+      firstQuestion: function () { this.goTo(0, '問題1番へ移動しました。'); },
+      lastQuestion: function () { this.goTo(this.exam.questions.length - 1, '最終問題へ移動しました。'); },
+      nextUnanswered: function () { this.gotoUnanswered(1); },
+      prevUnanswered: function () { this.gotoUnanswered(-1); },
+
+      readStatus: function () {
+        Speaker.speak(this.positionSpeech() + this.answerSpeech());
+      },
+
+      readTime: function () {
+        if (!this.endsAt) {
+          var elapsed = Math.round((Date.now() - this.startedAt) / 1000);
+          Speaker.speak('時間制限はありません。経過時間は' + this.spokenDuration(elapsed) + 'です。');
+          return;
+        }
+        var remain = Math.max(0, Math.round((this.endsAt - Date.now()) / 1000));
+        Speaker.speak('残り時間、' + this.spokenDuration(remain) + 'です。');
+      },
+
+      readUnanswered: function () {
+        var list = this.unansweredNumbers();
+        if (!list.length) { Speaker.speak('未解答の問題はありません。'); return; }
+        Speaker.speak('未解答は' + list.length + '問です。' +
+          list.map(function (n) { return n + '番'; }).join('、') + '。');
+      },
+
+      readKeyHelp: function () {
+        Speaker.speak(Keymap.helpText());
+        var det = document.getElementById('key-help-details');
+        if (det) det.open = true;
+      },
+
+      quit: function () {
+        if (this.screen === 'result') { this.backToStart(); return; }
+        if (this.quitPendingUntil > Date.now()) { this.finish(false); return; }
+        this.quitPendingUntil = Date.now() + QUIT_CONFIRM_MS;
+        var un = this.unansweredNumbers();
+        Speaker.speak('試験を終了しますか。' +
+          (un.length ? '未解答が' + un.length + '問あります。' : 'すべて解答済みです。') +
+          '終了する場合は、もう一度 Alt プラス Q を押してください。取り消すには Alt プラス C を押してください。',
+          { assertive: true });
+      }
+    },
+
+    readSentence: function (i) {
+      var q = this.q();
+      if (i >= q.text.length) {
+        Speaker.speak((i + 1) + '文目はありません。この問題文は' + q.text.length + '文です。');
+        return;
+      }
+      this.sentenceCursor = i + 1;
+      Speaker.speak((i + 1) + '文目。' + q.text[i]);
+    },
+
+    readChoice: function (i) {
+      var q = this.q();
+      Speaker.speak('選択肢' + CHOICE_LABELS[i] + '。' + q.choices[i]);
+    },
+
+    setAnswer: function (i, fromUI) {
+      this.answers[this.current] = i;
+      if (!fromUI) {
+        var input = document.getElementById('choice-' + i);
+        if (input) input.checked = true;
+      }
+      this.updateStatusLine();
+      this.saveSession();
+      Speaker.speak(CHOICE_LABELS[i] + 'を選択しました。');
+    },
+
+    goTo: function (index, prefix) {
+      this.current = index;
+      this.quitPendingUntil = 0;
+      this.render();
+      this.saveSession();
+      Speaker.speak((prefix || '') + this.questionSpeech(true));
+    },
+
+    /**
+     * 現在位置から dir 方向へ、最初に見つかった未解答問題へ移動する（末尾で折り返す）。
+     * 現在の問題自身は対象にしない。
+     */
+    gotoUnanswered: function (dir) {
+      var n = this.exam.questions.length;
+      for (var step = 1; step < n; step++) {
+        var i = ((this.current + dir * step) % n + n) % n;
+        if (this.answers[i] === null) {
+          this.goTo(i, (dir > 0 ? '後ろの' : '前の') + '未解答問題へ移動しました。');
+          return;
+        }
+      }
+      Speaker.speak(this.answers[this.current] === null
+        ? 'この問題以外に未解答の問題はありません。'
+        : '未解答の問題はありません。');
+    },
+
+    spokenDuration: function (sec) {
+      var m = Math.floor(sec / 60), s = sec % 60;
+      if (m === 0) return s + '秒';
+      return m + '分' + s + '秒';
+    },
+
+    backToStart: function () {
+      this.stopTimer();
+      Speaker.stop();
+      this.show('start');
+      var h = document.getElementById('start-heading');
+      if (h) h.focus();
+      Speaker.speak('最初の画面に戻りました。開始するボタンで試験を始めます。', { assertive: true });
+    },
+
+    /* ---- キー入力 ---------------------------------------------------- */
+    bindKeys: function () {
+      var self = this;
+
+      global.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Alt') {
+          self._altSolo = true;
+          if (self.settings.sticky) ev.preventDefault();  // メニューバーへのフォーカスを防ぐ
+          return;
+        }
+        self._altSolo = false;
+        self.handleKey(ev);
+      }, true);
+
+      global.addEventListener('keyup', function (ev) {
+        if (ev.key !== 'Alt') return;
+        if (self.settings.sticky && self._altSolo) {
+          self.armSticky();
+          ev.preventDefault();
+        }
+        self._altSolo = false;
+      }, true);
+    },
+
+    armSticky: function () {
+      this.stickyArmedUntil = Date.now() + STICKY_MS;
+      var el = this.el.stickyIndicator;
+      if (el) {
+        el.hidden = false;
+        el.textContent = '固定キー：入力待ち';
+        el.classList.add('armed');
+        var self = this;
+        global.setTimeout(function () {
+          if (Date.now() >= self.stickyArmedUntil) {
+            el.classList.remove('armed');
+            el.textContent = '固定キー：有効（Alt を押して離してからキー）';
+          }
+        }, STICKY_MS + 50);
+      }
+    },
+
+    handleKey: function (ev) {
+      if (ev.ctrlKey || ev.metaKey) return;               // Ctrl+Alt（AltGr）は対象外
+      var target = ev.target;
+      var inField = target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) &&
+        !(target.type === 'radio' || target.type === 'checkbox' || target.type === 'button');
+
+      var sticky = this.settings.sticky && Date.now() < this.stickyArmedUntil;
+      var direct = this.settings.directKeys && !inField;
+      if (!ev.altKey && !sticky && !direct) return;
+      if (inField && !ev.altKey && !sticky) return;
+
+      var action = Keymap.resolve(ev, this.settings.layout);
+      if (!action) return;
+
+      if (sticky) {
+        this.stickyArmedUntil = 0;
+        var el = this.el.stickyIndicator;
+        if (el) {
+          el.classList.remove('armed');
+          el.textContent = '固定キー：有効（Alt を押して離してからキー）';
+        }
+      }
+
+      // 画面ごとに使えるキーを絞る
+      var alwaysOk = { readKeyHelp: 1, quit: 1, readTime: 1 };
+      if (this.screen !== 'exam' && !alwaysOk[action]) {
+        ev.preventDefault();
+        if (this.screen === 'start') {
+          Speaker.speak('試験がまだ始まっていません。開始するボタンを押すか、Alt プラス H でキー一覧を確認してください。');
+        } else {
+          Speaker.speak('試験は終了しています。Alt プラス Q で最初の画面に戻ります。');
+        }
+        return;
+      }
+      if (this.screen !== 'exam' && action === 'readTime') {
+        ev.preventDefault();
+        Speaker.speak(this.screen === 'start' ? '試験がまだ始まっていません。' : '試験は終了しています。');
+        return;
+      }
+
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      if (action !== 'quit' && action !== 'clearAnswer') this.quitPendingUntil = 0;
+      var fn = this.actions[action];
+      if (fn) fn.call(this);
+    },
+
+    /* ---- ボタン ------------------------------------------------------ */
+    bindButtons: function () {
+      var self = this;
+      document.getElementById('btn-start').addEventListener('click', function () { self.start(false); });
+      this.el.resumeBtn.addEventListener('click', function () { self.resume(); });
+      document.getElementById('btn-finish').addEventListener('click', function () {
+        if (global.confirm('試験を終了して採点します。よろしいですか。')) self.finish(false);
+      });
+      document.getElementById('btn-retry').addEventListener('click', function () { self.backToStart(); });
+      document.getElementById('btn-prev').addEventListener('click', function () { self.actions.prevQuestion.call(self); });
+      document.getElementById('btn-next').addEventListener('click', function () { self.actions.nextQuestion.call(self); });
+      document.getElementById('btn-read').addEventListener('click', function () { self.actions.readAll.call(self); });
+      this.el.fileInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) self.loadExamFile(this.files[0]);
+      });
+    }
+  };
+
+  global.IPExamApp = App;
+  document.addEventListener('DOMContentLoaded', function () { App.init(); });
+})(window);
+
+</script>
+</body>
+</html>

@@ -1,30 +1,110 @@
 /* 情報処理技術者試験 模擬検定システム
-   画面は「見やすさ」優先。読み上げ主体の利用でも支障がないよう、
-   視覚的な装飾は情報を持たせない範囲にとどめる。 */
+   ------------------------------------------------------------------
+   本文は BIZ UDPGothic（ユニバーサルデザイン書体）、見出しは Zen Kaku Gothic New。
+   読み上げ主体の利用が前提なので、視覚的な装飾には情報を持たせない。
+   配色は3系統:
+     - 標準（明るい）           :root
+     - 標準（暗い）             OS 設定 / ホストのテーマに追随
+     - ハイコントラスト          html[data-contrast="high"]（利用者が選択、常に優先）
+   ------------------------------------------------------------------ */
 
 :root {
   --font-scale: 1;
-  --bg: #ffffff;
-  --fg: #1a1a1a;
-  --muted: #555555;
-  --line: #b0b0b0;
-  --accent: #0b5cad;
-  --accent-fg: #ffffff;
-  --panel: #f4f6f8;
-  --ok: #14632f;
-  --ng: #a3131a;
+
+  /* 明るい配色。ニュートラルはわずかに藍を含ませて、藍色のアクセントと同居させる */
+  --bg:       #fbfcfd;
+  --panel:    #eef2f7;
+  --fg:       #16202c;
+  --muted:    #4d5a68;
+  --line:     #bcc6d2;
+  --line-soft:#dbe2ea;
+  --accent:   #17457e;   /* 藍 */
+  --accent-fg:#ffffff;
+  --accent-soft: #dce7f5;
+  --ok:       #16653f;
+  --ng:       #9a1b22;
+  --focus:    #17457e;
+
+  /* キー配列図の色分け */
+  --k-question: #cfe0f4;
+  --k-choice:   #d6ecdc;
+  --k-answer:   #f7e2c8;
+  --k-move:     #e2dcf3;
+  --k-info:     #f8dbdd;
+  --k-reserved: #e4e7eb;
+  --k-ink:      #16202c;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-contrast="high"]) {
+    --bg:       #101720;
+    --panel:    #1a2431;
+    --fg:       #e7edf4;
+    --muted:    #a7b4c2;
+    --line:     #435365;
+    --line-soft:#2a3644;
+    --accent:   #8fb9e8;
+    --accent-fg:#0d141c;
+    --accent-soft: #1e2f43;
+    --ok:       #6cd39a;
+    --ng:       #ef9298;
+    --focus:    #8fb9e8;
+
+    --k-question: #1f3a55;
+    --k-choice:   #1e4033;
+    --k-answer:   #4a3720;
+    --k-move:     #322a52;
+    --k-info:     #4b2730;
+    --k-reserved: #262f3a;
+    --k-ink:      #e7edf4;
+  }
+}
+
+:root[data-theme="dark"]:not([data-contrast="high"]) {
+  --bg:       #101720;
+  --panel:    #1a2431;
+  --fg:       #e7edf4;
+  --muted:    #a7b4c2;
+  --line:     #435365;
+  --line-soft:#2a3644;
+  --accent:   #8fb9e8;
+  --accent-fg:#0d141c;
+  --accent-soft: #1e2f43;
+  --ok:       #6cd39a;
+  --ng:       #ef9298;
+  --focus:    #8fb9e8;
+
+  --k-question: #1f3a55;
+  --k-choice:   #1e4033;
+  --k-answer:   #4a3720;
+  --k-move:     #322a52;
+  --k-info:     #4b2730;
+  --k-reserved: #262f3a;
+  --k-ink:      #e7edf4;
+}
+
+/* 利用者が明示的に選んだハイコントラストは、OS のテーマより優先する */
 html[data-contrast="high"] {
-  --bg: #000000;
-  --fg: #ffe800;
-  --muted: #ffe800;
-  --line: #ffe800;
-  --accent: #ffe800;
-  --accent-fg: #000000;
-  --panel: #000000;
-  --ok: #4dff88;
-  --ng: #ff8888;
+  --bg:       #000000;
+  --panel:    #000000;
+  --fg:       #ffe800;
+  --muted:    #ffe800;
+  --line:     #ffe800;
+  --line-soft:#ffe800;
+  --accent:   #ffe800;
+  --accent-fg:#000000;
+  --accent-soft: #000000;
+  --ok:       #62ff9c;
+  --ng:       #ff9aa0;
+  --focus:    #ffffff;
+
+  --k-question: #000000;
+  --k-choice:   #000000;
+  --k-answer:   #000000;
+  --k-move:     #000000;
+  --k-info:     #000000;
+  --k-reserved: #000000;
+  --k-ink:      #ffe800;
 }
 
 * { box-sizing: border-box; }
@@ -33,29 +113,44 @@ html { background: var(--bg); }
 
 body {
   margin: 0;
-  padding: 0 1rem 4rem;
+  padding: 0 1.25rem 5rem;
   background: var(--bg);
   color: var(--fg);
-  font-family: "Meiryo", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
-  font-size: calc(1rem * var(--font-scale));
-  line-height: 1.8;
+  /* BIZ UDPGothic はユニバーサルデザイン書体。読みやすさを最優先する本文に使う */
+  font-family: "BIZ UDPGothic", "Meiryo", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+  font-size: calc(1.0625rem * var(--font-scale));
+  line-height: 1.9;
+  font-feature-settings: "palt" 0;
 }
 
-main { max-width: 60rem; margin: 0 auto; }
+main { max-width: 62rem; margin: 0 auto; }
 
-h1 { font-size: 1.6em; line-height: 1.4; }
-h2 { font-size: 1.3em; margin-top: 2em; border-bottom: 2px solid var(--line); padding-bottom: .2em; }
-h3 { font-size: 1.1em; }
+h1, h2, h3, legend, .statusbar {
+  font-family: "Zen Kaku Gothic New", "BIZ UDPGothic", "Meiryo", system-ui, sans-serif;
+}
+
+h1 { font-size: 1.75em; line-height: 1.45; text-wrap: balance; margin: 1.2em 0 .6em; }
+h2 {
+  font-size: 1.3em;
+  margin: 2.4em 0 .8em;
+  padding-bottom: .25em;
+  border-bottom: 2px solid var(--line);
+  text-wrap: balance;
+}
+h3 { font-size: 1.05em; margin: 1.4em 0 .4em; }
+
+p { margin: .7em 0; }
 
 a { color: var(--accent); }
 
+.lead { max-width: 44em; }
+
 .skip-link {
   position: absolute;
-  left: -9999px;
-  top: 0;
+  left: -9999px; top: 0;
   background: var(--accent);
   color: var(--accent-fg);
-  padding: .5em 1em;
+  padding: .6em 1.2em;
   z-index: 10;
 }
 .skip-link:focus { left: 0; }
@@ -71,137 +166,217 @@ a { color: var(--accent); }
 }
 
 /* フォーカスは常にはっきり見えるように */
-:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
-:focus:not(:focus-visible) { outline: 3px solid var(--accent); }
+:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: 3px solid var(--focus); }
 /* 解答画面のコンテナは自動でフォーカスするので、控えめな表示にする */
-#exam-app:focus { outline: 2px dashed var(--line); outline-offset: 6px; }
-
-/* チェックボックス・ラジオも配色に合わせる（ハイコントラスト時に効く） */
-input[type="radio"], input[type="checkbox"] { accent-color: var(--accent); }
+#exam-app:focus { outline: 2px dashed var(--line); outline-offset: 8px; }
 
 fieldset {
-  border: 2px solid var(--line);
-  border-radius: 6px;
-  padding: 1em 1.2em;
-  margin: 1em 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1em 1.3em 1.2em;
+  margin: 1em 0 1.6em;
+  background: var(--panel);
 }
-legend { font-weight: bold; padding: 0 .4em; }
+legend { font-weight: 700; padding: 0 .5em; }
 
-ul.options { list-style: none; margin: .5em 0; padding: 0; }
-ul.options li { margin: .4em 0; }
-ul.options input { margin-right: .5em; transform: scale(1.3); }
+ul.options { list-style: none; margin: .6em 0; padding: 0; display: flex; flex-direction: column; gap: .45em; }
+ul.options li { display: flex; align-items: flex-start; gap: .6em; }
+ul.options input { margin-top: .5em; flex: none; transform: scale(1.3); }
+
+input[type="radio"], input[type="checkbox"] { accent-color: var(--accent); }
 
 label { cursor: pointer; }
 
+.field { display: flex; flex-wrap: wrap; align-items: center; gap: .7em; margin: .9em 0; }
+
 input[type="number"], input[type="file"] {
+  font: inherit;
   font-size: 1em;
-  padding: .3em .4em;
-  border: 2px solid var(--line);
-  border-radius: 4px;
+  padding: .35em .5em;
+  border: 1px solid var(--line);
+  border-radius: 5px;
   background: var(--bg);
   color: var(--fg);
 }
-input[type="number"] { width: 7em; }
+input[type="number"] { width: 6em; font-variant-numeric: tabular-nums; }
 
-.hint { color: var(--muted); font-size: .95em; }
+.hint { color: var(--muted); font-size: .94em; max-width: 46em; }
 
-.actions { display: flex; flex-wrap: wrap; gap: .8em; margin: 1.2em 0; }
+.actions { display: flex; flex-wrap: wrap; gap: .8em; margin: 1.4em 0; }
 
 button {
+  font-family: "Zen Kaku Gothic New", "BIZ UDPGothic", system-ui, sans-serif;
   font-size: 1em;
-  font-family: inherit;
-  padding: .6em 1.2em;
+  padding: .6em 1.3em;
   border: 2px solid var(--accent);
-  border-radius: 6px;
+  border-radius: 7px;
   background: var(--bg);
   color: var(--fg);
   cursor: pointer;
-  min-height: 2.8em;
+  min-height: 2.9em;
 }
 button.primary { background: var(--accent); color: var(--accent-fg); }
 button:hover { text-decoration: underline; }
 
 kbd {
-  font-family: ui-monospace, "Consolas", monospace;
+  font-family: ui-monospace, "Consolas", "SFMono-Regular", monospace;
+  font-size: .9em;
   border: 1px solid var(--line);
   border-bottom-width: 2px;
   border-radius: 4px;
-  padding: 0 .35em;
-  background: var(--panel);
+  padding: .05em .4em;
+  background: var(--bg);
   color: var(--fg);
   white-space: nowrap;
 }
 
+/* ---- キー配列図 -------------------------------------------------------
+   割当ての理屈（問題文＝上段、選択肢＝中段、解答＝下段、移動＝左手）は
+   物理キーの位置そのものなので、キーボードの並びで示す。
+   同じ情報は下の表にもあるため、この図は支援技術からは隠す。 */
+.kbd-map { margin: 1.2em 0; overflow-x: auto; }
+.kbd-row { display: flex; gap: .3rem; margin-bottom: .3rem; }
+.kbd-row .indent { flex: none; }
+.kbd-row .indent.i1 { width: 1.1rem; }
+.kbd-row .indent.i2 { width: 2.4rem; }
+
+.kbd-key {
+  flex: none;
+  width: 4.4rem;
+  min-height: 3.4rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: .25rem .3rem;
+  background: var(--panel);
+  color: var(--k-ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .1rem;
+  line-height: 1.25;
+}
+.kbd-key .cap {
+  font-family: ui-monospace, "Consolas", monospace;
+  font-weight: 700;
+  font-size: 1em;
+}
+.kbd-key .use { font-size: .62em; text-align: center; color: var(--k-ink); }
+.kbd-key[data-role="question"] { background: var(--k-question); }
+.kbd-key[data-role="choice"]   { background: var(--k-choice); }
+.kbd-key[data-role="answer"]   { background: var(--k-answer); }
+.kbd-key[data-role="move"]     { background: var(--k-move); }
+.kbd-key[data-role="info"]     { background: var(--k-info); }
+.kbd-key[data-role="reserved"] { background: var(--k-reserved); border-style: dashed; opacity: .85; }
+.kbd-key[data-role="unused"]   { background: transparent; opacity: .45; }
+
+.kbd-legend {
+  list-style: none;
+  display: flex; flex-wrap: wrap; gap: .4em 1.2em;
+  margin: .8em 0 0; padding: 0;
+  font-size: .92em;
+}
+.kbd-legend li { display: flex; align-items: center; gap: .45em; }
+.kbd-legend .swatch {
+  width: 1.1em; height: 1.1em; flex: none;
+  border: 1px solid var(--line); border-radius: 3px;
+}
+
 /* ---- 試験画面 ---- */
-.exam-header { border-bottom: 3px solid var(--line); margin-bottom: 1em; }
+.exam-header { border-bottom: 2px solid var(--line); }
 
 .statusbar {
   display: flex;
   flex-wrap: wrap;
-  gap: .5em 1.4em;
-  margin: .4em 0 .8em;
-  font-weight: bold;
+  gap: .3em 1.5em;
+  margin: .3em 0 .9em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 .statusbar span { white-space: nowrap; }
-#sticky-indicator.armed { background: var(--accent); color: var(--accent-fg); padding: 0 .5em; border-radius: 4px; }
+#sticky-indicator.armed {
+  background: var(--accent); color: var(--accent-fg);
+  padding: 0 .6em; border-radius: 4px;
+}
 
-.question-text .sentence { margin: .4em 0; }
-.sentence-no { color: var(--muted); margin-right: .5em; font-variant-numeric: tabular-nums; }
+.question { max-width: 46em; }
+.question-text .sentence { margin: .45em 0; display: flex; gap: .6em; }
+.sentence-no { color: var(--muted); flex: none; font-variant-numeric: tabular-nums; }
 
 .figures figure {
-  margin: 1em 0;
-  padding: .8em 1em;
-  border: 2px dashed var(--line);
-  border-radius: 6px;
-  background: var(--panel);
+  margin: 1.2em 0;
+  padding: .9em 1.1em;
+  border-left: 5px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--accent-soft);
 }
-.figures figcaption { font-weight: bold; margin-bottom: .3em; }
+.figures figcaption { font-weight: 700; margin-bottom: .2em; }
 .figures p { margin: 0; }
 
-.choices ul { list-style: none; margin: 0; padding: 0; }
-.choices li { margin: .6em 0; display: flex; align-items: flex-start; gap: .6em; }
-.choices input { margin-top: .45em; transform: scale(1.4); flex: none; }
+.choices { max-width: 46em; }
+.choices ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .55em; }
+.choices li { display: flex; align-items: flex-start; gap: .7em; }
+.choices input { margin-top: .5em; flex: none; transform: scale(1.4); }
 
-.key-tables { display: grid; gap: 1em; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
-.key-group table { border-collapse: collapse; width: 100%; }
+.key-tables { display: grid; gap: 1.2em; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); }
+.key-group table { border-collapse: collapse; width: 100%; font-size: .95em; }
 .key-group th, .key-group td {
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-soft);
   padding: .3em .6em;
   text-align: left;
   vertical-align: top;
 }
 .key-group thead th { background: var(--panel); }
+.key-group th[scope="row"] { white-space: nowrap; }
 
-.log-section { margin-top: 2em; }
+details { margin: 1.4em 0; }
+summary { cursor: pointer; font-weight: 700; padding: .3em 0; }
+
+.log-section { margin-top: 2.4em; }
 .speech-log {
   list-style: none;
-  margin: 0; padding: .5em;
+  margin: 0; padding: .5em .8em;
   max-height: 12em;
   overflow-y: auto;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
   background: var(--panel);
-  font-size: .95em;
+  font-size: .92em;
+  line-height: 1.7;
 }
-.speech-log li { padding: .15em 0; border-bottom: 1px dotted var(--line); }
+.speech-log li { padding: .2em 0; border-bottom: 1px solid var(--line-soft); }
+.speech-log li:last-child { border-bottom: 0; }
 
 /* ---- 結果画面 ---- */
-.summary { display: grid; grid-template-columns: max-content 1fr; gap: .3em 1.5em; }
-.summary dt { font-weight: bold; }
+.summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: .3em 2em;
+  max-width: 26em;
+  font-variant-numeric: tabular-nums;
+}
+.summary dt { font-weight: 700; }
 .summary dd { margin: 0; }
 
-.result-list { padding-left: 1.4em; }
-.result-list li { margin: 1.2em 0; padding-left: .4em; border-left: 6px solid var(--line); }
+.result-list { padding-left: 1.5em; max-width: 48em; }
+.result-list li { margin: 1.4em 0; padding-left: .7em; border-left: 5px solid var(--line); }
 .result-list li.correct { border-left-color: var(--ok); }
 .result-list li.incorrect { border-left-color: var(--ng); }
 .result-list h3 { margin: 0 0 .3em; }
 .result-list .explanation { color: var(--muted); }
 
-footer { max-width: 60rem; margin: 3em auto 0; border-top: 1px solid var(--line); padding-top: 1em; }
+footer {
+  max-width: 62rem;
+  margin: 4em auto 0;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 1.2em;
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
 @media print {
-  .actions, .speech-log, .log-section { display: none; }
+  .actions, .log-section, .kbd-map { display: none; }
 }

@@ -150,7 +150,68 @@
   };
   function spoken(label) { return SPOKEN[label] || label; }
 
+  /* ---- キー配列図 ------------------------------------------------------
+     割当ての理屈は物理キーの位置そのもの（問題文＝上段、選択肢＝中段、
+     解答＝下段、移動＝左手）なので、キーボードの並びで示せるようにする。 */
+  var ROWS = [
+    { indent: 0, caps: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', ']'] },
+    { indent: 1, caps: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';'] },
+    { indent: 2, caps: ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/'] }
+  ];
+
+  var ROLE_OF_GROUP = {
+    '問題文': 'question',
+    '選択肢を読む': 'choice',
+    '解答する': 'answer',
+    '移動': 'move',
+    '情報を聞く': 'info'
+  };
+
+  var ROLE_LABELS = [
+    ['question', '問題文を読む'],
+    ['choice', '選択肢を読む'],
+    ['answer', '解答する'],
+    ['move', '移動する'],
+    ['info', '情報を聞く'],
+    ['reserved', 'ブラウザが使うため未割当て'],
+    ['unused', '未使用']
+  ];
+
+  /* 図の中は狭いので、短い呼び名を別に持つ */
+  var SHORT = {
+    readAll: '全文', readSentence1: '1文', readSentence2: '2文', readSentence3: '3文',
+    readSentence4: '4文', readSentence5: '5文', readNextSentence: '次の文', readNextFigure: '図',
+    readChoice0: '読ア', readChoice1: '読イ', readChoice2: '読ウ', readChoice3: '読エ',
+    answer0: '答ア', answer1: '答イ', answer2: '答ウ', answer3: '答エ', clearAnswer: '解除',
+    nextQuestion: '次問', prevQuestion: '前問', firstQuestion: '先頭', lastQuestion: '末尾',
+    nextUnanswered: '次の未', prevUnanswered: '前の未',
+    readStatus: '状態', readTime: '時間', readUnanswered: '未一覧', readKeyHelp: 'キー', quit: '終了'
+  };
+
+  var byLabel = Object.create(null);
+  ENTRIES.forEach(function (e) { byLabel[e.keyLabel] = e; });
+  var reservedByLabel = Object.create(null);
+  RESERVED.forEach(function (r) { reservedByLabel[r.keyLabel] = r; });
+
+  /** キー配列図のためのデータ（行 × キー）を返す */
+  function layoutRows() {
+    return ROWS.map(function (row) {
+      return {
+        indent: row.indent,
+        keys: row.caps.map(function (cap) {
+          var e = byLabel[cap];
+          if (e) return { cap: cap, role: ROLE_OF_GROUP[e.group], use: SHORT[e.action] || '', title: e.desc };
+          var r = reservedByLabel[cap];
+          if (r) return { cap: cap, role: 'reserved', use: r.reason, title: 'Alt+' + cap + ' は' + r.reason };
+          return { cap: cap, role: 'unused', use: '', title: '' };
+        })
+      };
+    });
+  }
+
   global.IPExamKeymap = {
+    layoutRows: layoutRows,
+    roleLabels: ROLE_LABELS,
     entries: ENTRIES,
     grouped: grouped,
     resolve: resolve,

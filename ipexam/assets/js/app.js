@@ -88,6 +88,7 @@
       this.applySettings();
       this.renderKeyTables(this.el.keyTables);
       this.renderKeyTables(this.el.keyTablesStart);
+      this.renderKeyMap(document.getElementById('key-map'));
       this.bindButtons();
       this.bindKeys();
       this.exam = this.normalizeExam(global.IPExamSampleData);
@@ -434,6 +435,58 @@
       this.el.answerState.textContent = a === null ? '未解答' : CHOICE_LABELS[a] + ' を選択中';
       var un = this.unansweredNumbers();
       this.el.unansweredCount.textContent = un.length ? '未解答 ' + un.length + ' 問' : 'すべて解答済み';
+    },
+
+    /**
+     * キー配列図を描く。割当ての理屈（上段＝問題文、中段＝選択肢、下段＝解答、
+     * 左手＝移動）は物理キーの位置そのものなので、キーボードの並びで見せる。
+     * 同じ情報はキー割当て表にもあるため、図は支援技術からは隠す。
+     */
+    renderKeyMap: function (container) {
+      if (!container) return;
+      container.textContent = '';
+      container.setAttribute('aria-hidden', 'true');
+
+      Keymap.layoutRows().forEach(function (row) {
+        var rowEl = document.createElement('div');
+        rowEl.className = 'kbd-row';
+        if (row.indent) {
+          var pad = document.createElement('span');
+          pad.className = 'indent i' + row.indent;
+          rowEl.appendChild(pad);
+        }
+        row.keys.forEach(function (k) {
+          var key = document.createElement('span');
+          key.className = 'kbd-key';
+          key.setAttribute('data-role', k.role);
+          if (k.title) key.title = k.title;
+          var cap = document.createElement('span');
+          cap.className = 'cap';
+          cap.textContent = k.cap;
+          key.appendChild(cap);
+          if (k.use) {
+            var use = document.createElement('span');
+            use.className = 'use';
+            use.textContent = k.use;
+            key.appendChild(use);
+          }
+          rowEl.appendChild(key);
+        });
+        container.appendChild(rowEl);
+      });
+
+      var legend = document.createElement('ul');
+      legend.className = 'kbd-legend';
+      Keymap.roleLabels.forEach(function (pair) {
+        var li = document.createElement('li');
+        var sw = document.createElement('span');
+        sw.className = 'swatch';
+        sw.style.background = 'var(--k-' + pair[0] + ')';
+        li.appendChild(sw);
+        li.appendChild(document.createTextNode(pair[1]));
+        legend.appendChild(li);
+      });
+      container.appendChild(legend);
     },
 
     renderKeyTables: function (container) {
