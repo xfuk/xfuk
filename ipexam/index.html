@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>情報処理技術者試験 模擬検定システム（スクリーンリーダ対応）</title>
+<meta name="description" content="視覚障害者向け「日商PC検定3級」模擬検定システムのキー操作を参考にした、情報処理技術者試験の模擬検定Webアプリ。">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">本文へ移動</a>
+
+<!-- 読み上げ用のライブリージョン（画面には表示しない） -->
+<div id="live-a" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="live-b" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="live-assertive" class="visually-hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<main id="main">
+
+<!-- ======================= 起動と準備 ======================= -->
+<section id="screen-start" aria-labelledby="start-heading">
+  <h1 id="start-heading" tabindex="-1">情報処理技術者試験 模擬検定システム</h1>
+
+  <p>
+    このシステムは、キーボードだけで四肢択一の問題に解答できる模擬検定です。
+    視覚障害者向け「日商PC検定3級」模擬検定システムのキー操作を参考に、
+    情報処理技術者試験の形式へ割り当て直しています。
+    操作はすべて <kbd>Alt</kbd> との同時押しです。
+    スクリーンリーダを使わない方にも、目と手を動かさずに解答できる方法として利用できます。
+  </p>
+
+  <h2>1. 読み上げの方法を選ぶ</h2>
+  <fieldset>
+    <legend>読み上げ方法</legend>
+    <p class="hint">
+      スクリーンリーダ（NVDA、PC-Talker、JAWS、ナレーター、VoiceOver など）をお使いの方は
+      「スクリーンリーダで読む」のままにしてください。二重に読み上げられるのを防ぎます。
+    </p>
+    <ul class="options">
+      <li><input type="radio" id="sm-sr" name="speech-mode" value="sr">
+          <label for="sm-sr">スクリーンリーダで読む（既定）</label></li>
+      <li><input type="radio" id="sm-tts" name="speech-mode" value="tts">
+          <label for="sm-tts">このブラウザの音声合成で読む</label></li>
+      <li><input type="radio" id="sm-both" name="speech-mode" value="both">
+          <label for="sm-both">両方で読む</label></li>
+    </ul>
+    <p id="tts-note" class="hint"></p>
+    <p>
+      <label for="opt-rate">音声合成の速さ（0.5〜3.0）</label>
+      <input type="number" id="opt-rate" min="0.5" max="3" step="0.1" inputmode="decimal">
+    </p>
+  </fieldset>
+
+  <h2>2. キー操作の設定</h2>
+  <fieldset>
+    <legend>キー操作</legend>
+    <ul class="options">
+      <li><input type="checkbox" id="opt-sticky">
+          <label for="opt-sticky">固定キー方式を使う（<kbd>Alt</kbd> を押して離してから、次のキーを単独で押す）</label></li>
+      <li><input type="checkbox" id="opt-appmode">
+          <label for="opt-appmode">アプリケーションモード（試験中はスクリーンリーダのキー操作より本システムを優先する。推奨）</label></li>
+      <li><input type="checkbox" id="opt-direct">
+          <label for="opt-direct"><kbd>Alt</kbd> なしの単独キーでも操作する（スクリーンリーダ利用時は非推奨）</label></li>
+    </ul>
+    <p class="hint">
+      固定キー方式は、<kbd>Alt</kbd> を押して離すと5秒間だけ「入力待ち」になり、
+      その間に押したキーが <kbd>Alt</kbd> との同時押しとして扱われます。
+      Windows のキーボード設定にある「固定キー機能」とは独立して動きます。
+    </p>
+    <p>
+      <label for="layout-auto-label">キーボード配列</label>
+    </p>
+    <ul class="options" id="layout-auto-label">
+      <li><input type="radio" id="ly-auto" name="layout" value="auto">
+          <label for="ly-auto">自動判定（既定）</label></li>
+      <li><input type="radio" id="ly-jis" name="layout" value="jis">
+          <label for="ly-jis">日本語配列（JIS）</label></li>
+      <li><input type="radio" id="ly-us" name="layout" value="us">
+          <label for="ly-us">英語配列（US）</label></li>
+    </ul>
+  </fieldset>
+
+  <h2>3. 試験の設定</h2>
+  <fieldset>
+    <legend>試験</legend>
+    <p>
+      <label for="opt-time-limit">制限時間（分。0 で時間制限なし）</label>
+      <input type="number" id="opt-time-limit" min="0" max="300" step="1" inputmode="numeric">
+    </p>
+    <p>問題を移動したときの読み上げ</p>
+    <ul class="options">
+      <li><input type="radio" id="ar-full" name="auto-read" value="full">
+          <label for="ar-full">問題番号・状態に続けて問題文と選択肢も読む（既定）</label></li>
+      <li><input type="radio" id="ar-num" name="auto-read" value="number">
+          <label for="ar-num">問題番号と解答状態だけ読む</label></li>
+    </ul>
+    <p>
+      <label for="exam-file">問題ファイル（JSON）を読み込む</label>
+      <input type="file" id="exam-file" accept="application/json,.json">
+    </p>
+    <p id="exam-file-status" class="hint" role="status">
+      読み込まない場合は、内蔵のサンプル問題（10問）で受験します。
+    </p>
+  </fieldset>
+
+  <h2>4. 画面の見え方</h2>
+  <fieldset>
+    <legend>表示</legend>
+    <ul class="options">
+      <li><input type="radio" id="ct-normal" name="contrast" value="normal">
+          <label for="ct-normal">標準</label></li>
+      <li><input type="radio" id="ct-high" name="contrast" value="high">
+          <label for="ct-high">ハイコントラスト（黒地に黄色）</label></li>
+    </ul>
+    <p>
+      <label for="opt-font-scale">文字の大きさ（1.0〜3.0倍）</label>
+      <input type="number" id="opt-font-scale" min="1" max="3" step="0.1" inputmode="decimal">
+    </p>
+  </fieldset>
+
+  <h2>5. 開始する</h2>
+  <p id="resume-info" class="hint"></p>
+  <p class="actions">
+    <button type="button" id="btn-start" class="primary">試験を開始する</button>
+    <button type="button" id="btn-resume" hidden>前回の続きから再開する</button>
+  </p>
+
+  <h2>キー割当て一覧</h2>
+  <p class="hint">すべて <kbd>Alt</kbd> と同時に押します。試験中は <kbd>Alt</kbd>+<kbd>H</kbd> でも読み上げます。</p>
+  <div id="key-tables-start" class="key-tables"></div>
+  <p class="hint">
+    Chrome と Edge がブラウザ自身で使うため、割当てを避けたキー:
+    <kbd>Alt</kbd>+<kbd>D</kbd>（アドレスバー）、<kbd>Alt</kbd>+<kbd>E</kbd> と <kbd>Alt</kbd>+<kbd>F</kbd>（メニュー）、
+    <kbd>Alt</kbd>+<kbd>Home</kbd>、<kbd>Alt</kbd>+<kbd>←</kbd>、<kbd>Alt</kbd>+<kbd>→</kbd>。
+  </p>
+</section>
+
+<!-- ======================= 試験画面 ======================= -->
+<section id="screen-exam" aria-labelledby="exam-title" hidden>
+  <div id="exam-app" tabindex="-1" aria-label="模擬検定 解答画面">
+
+    <header class="exam-header">
+      <h1 id="exam-title">模擬検定</h1>
+      <p class="statusbar">
+        <span id="question-progress">1 / 1 問</span>
+        <span id="answer-state">未解答</span>
+        <span id="unanswered-count"></span>
+        <span id="timer">--:--</span>
+        <span id="sticky-indicator" hidden>固定キー：有効（Alt を押して離してからキー）</span>
+      </p>
+    </header>
+
+    <article class="question" aria-labelledby="question-heading">
+      <h2 id="question-heading">問 1</h2>
+      <div id="question-text" class="question-text"></div>
+      <div id="question-figures" class="figures" hidden></div>
+
+      <fieldset class="choices">
+        <legend>解答を選んでください</legend>
+        <ul id="choice-list"></ul>
+      </fieldset>
+    </article>
+
+    <p class="actions">
+      <button type="button" id="btn-prev">前の問題（Alt+B）</button>
+      <button type="button" id="btn-read">問題文を読む（Alt+Y）</button>
+      <button type="button" id="btn-next">次の問題（Alt+N）</button>
+      <button type="button" id="btn-finish">試験を終了する（Alt+Q）</button>
+    </p>
+
+    <details id="key-help-details">
+      <summary>キー割当て一覧（Alt+H で読み上げ）</summary>
+      <div id="key-tables" class="key-tables"></div>
+    </details>
+
+    <section aria-labelledby="log-heading" class="log-section">
+      <h2 id="log-heading">読み上げた内容</h2>
+      <p class="hint">直近30件を表示します。スクリーンリーダの読み上げを目で確認するための欄です。</p>
+      <ul id="speech-log" class="speech-log"></ul>
+    </section>
+  </div>
+</section>
+
+<!-- ======================= 結果画面 ======================= -->
+<section id="screen-result" aria-labelledby="result-heading" hidden>
+  <h1 id="result-heading" tabindex="-1">採点結果</h1>
+  <dl id="result-summary" class="summary"></dl>
+  <p class="actions">
+    <button type="button" id="btn-retry">最初の画面に戻る（Alt+Q）</button>
+  </p>
+  <h2>各問の正誤と解説</h2>
+  <ol id="result-list" class="result-list"></ol>
+</section>
+
+</main>
+
+<footer>
+  <p class="hint">
+    キー割当ては、視覚障害者向け「日商PC検定3級」模擬検定システム（日本視覚障害者職能開発センター）の
+    操作方法を参考に、情報処理技術者試験向けに再構成したものです。
+    日商PC検定からの変更点は、未回答ジャンプを <kbd>F</kbd>・<kbd>D</kbd> から <kbd>X</kbd>・<kbd>Z</kbd> へ移した点。
+    新設は <kbd>[</kbd> <kbd>]</kbd> <kbd>R</kbd> <kbd>C</kbd> <kbd>H</kbd> の5つです。
+  </p>
+</footer>
+
+<script src="assets/js/keymap.js"></script>
+<script src="assets/js/speech.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+/* 情報処理技術者試験 模擬検定システム
+   画面は「見やすさ」優先。読み上げ主体の利用でも支障がないよう、
+   視覚的な装飾は情報を持たせない範囲にとどめる。 */
+
+:root {
+  --font-scale: 1;
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #555555;
+  --line: #b0b0b0;
+  --accent: #0b5cad;
+  --accent-fg: #ffffff;
+  --panel: #f4f6f8;
+  --ok: #14632f;
+  --ng: #a3131a;
+}
+
+html[data-contrast="high"] {
+  --bg: #000000;
+  --fg: #ffe800;
+  --muted: #ffe800;
+  --line: #ffe800;
+  --accent: #ffe800;
+  --accent-fg: #000000;
+  --panel: #000000;
+  --ok: #4dff88;
+  --ng: #ff8888;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+body {
+  margin: 0;
+  padding: 0 1rem 4rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Meiryo", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+  font-size: calc(1rem * var(--font-scale));
+  line-height: 1.8;
+}
+
+main { max-width: 60rem; margin: 0 auto; }
+
+h1 { font-size: 1.6em; line-height: 1.4; }
+h2 { font-size: 1.3em; margin-top: 2em; border-bottom: 2px solid var(--line); padding-bottom: .2em; }
+h3 { font-size: 1.1em; }
+
+a { color: var(--accent); }
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: .5em 1em;
+  z-index: 10;
+}
+.skip-link:focus { left: 0; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* フォーカスは常にはっきり見えるように */
+:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: 3px solid var(--accent); }
+/* 解答画面のコンテナは自動でフォーカスするので、控えめな表示にする */
+#exam-app:focus { outline: 2px dashed var(--line); outline-offset: 6px; }
+
+/* チェックボックス・ラジオも配色に合わせる（ハイコントラスト時に効く） */
+input[type="radio"], input[type="checkbox"] { accent-color: var(--accent); }
+
+fieldset {
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  padding: 1em 1.2em;
+  margin: 1em 0;
+}
+legend { font-weight: bold; padding: 0 .4em; }
+
+ul.options { list-style: none; margin: .5em 0; padding: 0; }
+ul.options li { margin: .4em 0; }
+ul.options input { margin-right: .5em; transform: scale(1.3); }
+
+label { cursor: pointer; }
+
+input[type="number"], input[type="file"] {
+  font-size: 1em;
+  padding: .3em .4em;
+  border: 2px solid var(--line);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+}
+input[type="number"] { width: 7em; }
+
+.hint { color: var(--muted); font-size: .95em; }
+
+.actions { display: flex; flex-wrap: wrap; gap: .8em; margin: 1.2em 0; }
+
+button {
+  font-size: 1em;
+  font-family: inherit;
+  padding: .6em 1.2em;
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+  min-height: 2.8em;
+}
+button.primary { background: var(--accent); color: var(--accent-fg); }
+button:hover { text-decoration: underline; }
+
+kbd {
+  font-family: ui-monospace, "Consolas", monospace;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 .35em;
+  background: var(--panel);
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+/* ---- 試験画面 ---- */
+.exam-header { border-bottom: 3px solid var(--line); margin-bottom: 1em; }
+
+.statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5em 1.4em;
+  margin: .4em 0 .8em;
+  font-weight: bold;
+}
+.statusbar span { white-space: nowrap; }
+#sticky-indicator.armed { background: var(--accent); color: var(--accent-fg); padding: 0 .5em; border-radius: 4px; }
+
+.question-text .sentence { margin: .4em 0; }
+.sentence-no { color: var(--muted); margin-right: .5em; font-variant-numeric: tabular-nums; }
+
+.figures figure {
+  margin: 1em 0;
+  padding: .8em 1em;
+  border: 2px dashed var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+.figures figcaption { font-weight: bold; margin-bottom: .3em; }
+.figures p { margin: 0; }
+
+.choices ul { list-style: none; margin: 0; padding: 0; }
+.choices li { margin: .6em 0; display: flex; align-items: flex-start; gap: .6em; }
+.choices input { margin-top: .45em; transform: scale(1.4); flex: none; }
+
+.key-tables { display: grid; gap: 1em; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
+.key-group table { border-collapse: collapse; width: 100%; }
+.key-group th, .key-group td {
+  border: 1px solid var(--line);
+  padding: .3em .6em;
+  text-align: left;
+  vertical-align: top;
+}
+.key-group thead th { background: var(--panel); }
+
+.log-section { margin-top: 2em; }
+.speech-log {
+  list-style: none;
+  margin: 0; padding: .5em;
+  max-height: 12em;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: .95em;
+}
+.speech-log li { padding: .15em 0; border-bottom: 1px dotted var(--line); }
+
+/* ---- 結果画面 ---- */
+.summary { display: grid; grid-template-columns: max-content 1fr; gap: .3em 1.5em; }
+.summary dt { font-weight: bold; }
+.summary dd { margin: 0; }
+
+.result-list { padding-left: 1.4em; }
+.result-list li { margin: 1.2em 0; padding-left: .4em; border-left: 6px solid var(--line); }
+.result-list li.correct { border-left-color: var(--ok); }
+.result-list li.incorrect { border-left-color: var(--ng); }
+.result-list h3 { margin: 0 0 .3em; }
+.result-list .explanation { color: var(--muted); }
+
+footer { max-width: 60rem; margin: 3em auto 0; border-top: 1px solid var(--line); padding-top: 1em; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+  .actions, .speech-log, .log-section { display: none; }
+}
