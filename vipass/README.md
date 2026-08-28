@@ -179,7 +179,10 @@ vipass/
 │       ├── speech.js         ライブリージョンと音声合成の読み上げ
 │       ├── data.js           内蔵のサンプル問題
 │       └── app.js            試験の進行、解答、採点、キー入力の処理
-└── data/sample-exam.json     問題ファイルの書式サンプル
+├── data/sample-exam.json     問題ファイルの書式サンプル
+├── tools/build-single.js     1枚の HTML にまとめるビルドスクリプト
+└── dist/
+    └── vipass-standalone.html  配布用の単体ファイル（ビルド結果）
 ```
 
 ## 参考
