@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>サウンド校正アシスト デモ(ブラウザ版)</title>
+  <link rel="stylesheet" href="../src/taskpane/taskpane.css" />
+  <style>
+    body { max-width: 900px; margin: 0 auto; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+    textarea#doc { width: 100%; min-height: 260px; font-size: 1rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>サウンド校正アシスト デモ(ブラウザ版)</h1>
+    <p class="lead">Word を使わずに検出・効果音・読み上げの動作を確かめるページです。中核のコードは Word アドインと共通です。</p>
+  </header>
+  <div id="live" role="status" aria-live="assertive" aria-atomic="true" class="live"></div>
+
+  <section class="panel">
+    <div class="row">
+      <button id="btn-unlock" type="button">サウンドを有効化</button>
+      <button id="btn-toggle" type="button" aria-pressed="false">監視を開始</button>
+      <button id="btn-check" type="button">今すぐチェック</button>
+      <button id="btn-test" type="button">テスト音(スペル→文法→表記→修正)</button>
+    </div>
+    <p id="status" class="status" aria-live="polite">「サウンドを有効化」を押してから、下の欄に入力してください。</p>
+  </section>
+
+  <div class="cols">
+    <section class="panel" aria-labelledby="h-doc">
+      <h2 id="h-doc">文書</h2>
+      <textarea id="doc" aria-labelledby="h-doc">I will recieve teh package tommorow.
+It is a apple. it works.
+こんにちわ。シュミレーションを行う。。</textarea>
+    </section>
+    <section class="panel" aria-labelledby="h-errors">
+      <h2 id="h-errors">誤りの一覧 <span id="error-count" class="count">0件</span></h2>
+      <ul id="error-list" role="listbox" tabindex="0" class="error-list"></ul>
+      <p class="hint">クリックまたは Enter で該当箇所を選択します。</p>
+    </section>
+  </div>
+
+  <details class="panel" open>
+    <summary><h2>設定</h2></summary>
+    <div class="cols">
+      <fieldset>
+        <legend>効果音</legend>
+        <label><input type="checkbox" data-setting="soundEnabled" /> 効果音を鳴らす</label>
+        <label for="soundPreset">音のプリセット</label>
+        <select id="soundPreset" data-setting="soundPreset"></select>
+        <label for="volume">音量</label>
+        <input id="volume" type="range" min="0" max="1" step="0.05" data-setting="volume" />
+        <label><input type="checkbox" data-setting="soundSpelling" /> スペルミスの音</label>
+        <label><input type="checkbox" data-setting="soundGrammar" /> 文法エラーの音</label>
+        <label><input type="checkbox" data-setting="soundStyle" /> 表記ゆれ・体裁の音</label>
+        <label><input type="checkbox" data-setting="soundResolved" /> 修正されたときの確認音</label>
+        <label><input type="checkbox" data-setting="stereoPan" /> 行内の位置を左右の定位で表現する</label>
+        <label><input type="checkbox" data-setting="deferWhileTyping" /> 入力中の語は区切りを打つまで通知しない</label>
+      </fieldset>
+      <fieldset>
+        <legend>読み上げと検出</legend>
+        <label for="speechMode">読み上げの内容</label>
+        <select id="speechMode" data-setting="speechMode">
+          <option value="none">読み上げない</option>
+          <option value="type">種類のみ</option>
+          <option value="word">種類と語</option>
+          <option value="spell">種類と語と綴り</option>
+        </select>
+        <label for="speechRate">読み上げ速度</label>
+        <input id="speechRate" type="range" min="0.5" max="2" step="0.1" data-setting="speechRate" />
+        <label><input type="checkbox" data-setting="liveRegion" /> ライブリージョンで通知する</label>
+        <label for="checker">チェッカー</label>
+        <select id="checker" data-setting="checker">
+          <option value="builtin">内蔵</option>
+          <option value="languagetool">LanguageTool</option>
+          <option value="both">両方</option>
+        </select>
+        <label for="languageToolEndpoint">LanguageTool の URL</label>
+        <input id="languageToolEndpoint" type="url" data-setting="languageToolEndpoint" />
+        <label for="pollIntervalMs">監視間隔(ミリ秒)</label>
+        <input id="pollIntervalMs" type="number" min="300" step="100" data-setting="pollIntervalMs" />
+      </fieldset>
+    </div>
+    <fieldset>
+      <legend>ユーザー辞書</legend>
+      <textarea id="dictionary" rows="5" aria-label="ユーザー辞書"></textarea>
+      <div class="row"><button id="btn-dict-apply" type="button">辞書を適用</button></div>
+    </fieldset>
+  </details>
+
+  <details class="panel">
+    <summary><h2>評価用ログ</h2></summary>
+    <label for="participant">参加者 ID</label>
+    <input id="participant" type="text" data-setting="participant" />
+    <label for="condition">条件</label>
+    <input id="condition" type="text" data-setting="condition" />
+    <div class="row">
+      <button id="btn-log-summary" type="button">集計を表示</button>
+      <button id="btn-log-csv" type="button">CSV を表示</button>
+      <button id="btn-log-download" type="button">CSV を保存</button>
+      <button id="btn-log-clear" type="button">ログを消去</button>
+    </div>
+    <pre id="log-output" class="log" tabindex="0"></pre>
+  </details>
+
+  <script type="module" src="demo.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# サンプル辞書: 誤り,正しい語
+# 評価実験で文書に埋め込む誤りをここに列挙しておくと、内蔵チェッカーが確実に検出する。
+teh,the
+recieve,receive
+seperate,separate
+definately,definitely
+occured,occurred
+enviroment,environment
+accomodate,accommodate
+goverment,government
+tommorow,tomorrow
+untill,until
+こんにちわ,こんにちは
+シュミレーション,シミュレーション
+うる覚え,うろ覚え
+的を得る,的を射る
+汚名挽回,汚名返上
+コミニュケーション,コミュニケーション

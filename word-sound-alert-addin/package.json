@@ -1,0 +1,24 @@
+{
+  "name": "word-sound-alert-addin",
+  "version": "0.1.0",
+  "description": "Microsoft Word 用アドイン: スペルミス・文法エラーを音声と効果音で通知する",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\"",
+    "dev-server": "node scripts/dev-server.mjs --port 3000",
+    "demo": "node scripts/dev-server.mjs --http --port 8080",
+    "start": "office-addin-debugging start manifest.xml desktop",
+    "stop": "office-addin-debugging stop manifest.xml",
+    "validate": "office-addin-manifest validate manifest.xml",
+    "icons": "python3 scripts/make-icons.py"
+  },
+  "devDependencies": {
+    "office-addin-debugging": "^6.1.2",
+    "office-addin-dev-certs": "^2.0.10",
+    "office-addin-manifest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
