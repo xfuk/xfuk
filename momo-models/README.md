@@ -8,7 +8,7 @@ VIPDOT の自動点訳との比較（vipdot/docs/comparison.md）に使いまし
 | ファイル | 窓 | 名前 | 大きさ | 学習の設定 |
 | --- | --- | --- | --- | --- |
 | basic_data_4.mbm | 4 | small | 11.9MB | boundary-n-estimators 100、num-leaves 23（作者の Taskfile と同じ） |
-| basic_data_5.mbm | 5 | medium | | boundary-n-estimators 200 |
+| basic_data_5.mbm | 5 | medium | 24.9MB | boundary-n-estimators 200 |
 | basic_data_7.mbm | 7 | large | 38.0MB | boundary-n-estimators 200（作者の既定の窓） |
 
 - MOMO のコミット dab9eb4（2026-09-05 取得）の momo-py で学習した。読みモデルは LinearSVC
@@ -22,6 +22,7 @@ VIPDOT の自動点訳との比較（vipdot/docs/comparison.md）に使いまし
 | | 規則書の用例 2,100 組 | 教科書の本文 4,691 文 | 厚生労働省の資料 6,864 文 |
 | --- | ---: | ---: | ---: |
 | small（窓4） | 39.2% | 80.2% | 72.3% |
+| medium（窓5） | 44.3% | 81.2% | 74.5% |
 | large（窓7） | 45.1% | 81.0% | 74.1% |
 
 モデルは学習データ（BSD-3-Clause）から作った派生物で、同じライセンスで扱う。
